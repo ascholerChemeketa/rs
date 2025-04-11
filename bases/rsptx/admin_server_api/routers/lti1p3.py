@@ -224,8 +224,15 @@ async def login_or_create_user(
     # the host, not the container.
     url = f"https://host.docker.internal/default/w2py_login?token={encoded_jwt}"
     async with aiohttp.ClientSession() as session:
-        resp = await session.get(url)
-        resp.raise_for_status()
+        try:
+            resp = await session.get(url)
+            resp.raise_for_status()
+        except Exception as e:
+            rslogger.error(f"LTI1p3 - Error logging in to w2p server: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error logging in to w2p server '{e}'",
+            )
 
     return lti_user
 
