@@ -28,6 +28,8 @@ services:
   redis:
     image: redis:6-alpine
     restart: always
+    ports:
+      - 6379:6379
 
   # The db service provides an easy way for new developers to get up and running quickly.
   # it could also be used for a production system for a single department.  For production
@@ -276,7 +278,7 @@ services:
     ports:
       # ports are specified host:container
       - 80:80
-    #- 443:443
+      - 443:443
     volumes:
       - ${BOOK_PATH}:/usr/books
     depends_on:
@@ -338,7 +340,6 @@ services:
       - DBURL=${DC_DBURL:-$DBURL}
       - DOCKER_COMPOSE=1
       - LOG_LEVEL=${LOG_LEVEL:-WARN}
-      - FERNET_SECRET=${FERNET_SECRET}
       - JWT_SECRET=${JWT_SECRET}
       - WEB2PY_PRIVATE_KEY=${WEB2PY_PRIVATE_KEY}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-runestone}
