@@ -35,7 +35,6 @@
 
 function addReadingList() {
     if (eBookConfig.readings) {
-        var l, nxt, path_parts, nxt_link;
         let cur_path_parts = window.location.pathname.split("/");
         let name =
             cur_path_parts[cur_path_parts.length - 2] +
@@ -52,18 +51,48 @@ function addReadingList() {
 
         let position = eBookConfig.readings.indexOf(name);
         let num_readings = eBookConfig.readings.length;
+
+        let reading_links = [];
+
+        // ptxbook ends in course/page, rst ends in course/chapter/page
+        let path_parts;
+        if (ptxbook) {
+            path_parts = cur_path_parts.slice(0, cur_path_parts.length - 1);
+        } else {
+            path_parts = cur_path_parts.slice(0, cur_path_parts.length - 2);
+        }
+
+        // possible go back link
+        if (position > 0) {
+            let prev = eBookConfig.readings[position - 1];
+            let prev_link_parts = path_parts.slice(); // make a copy
+            prev_link_parts.push(prev);
+            let prev_link = prev_link_parts.join("/");
+            let l = $("<a />", {
+                name: "link",
+                class: "btn btn-lg reading-navigation buttonConfirmCompletion",
+                href: prev_link,
+                text: `Back to page ${
+                    position
+                } of ${num_readings} in the reading assignment.`,
+            });
+            reading_links.push(l);
+        }
+
+        // go forward link, done message, or not in reading message
         if (position == eBookConfig.readings.length - 1) {
             // no more readings
-            l = $("<div />", {
+            let l = $("<div />", {
                 text: `Finished reading assignment. Page ${num_readings} of ${num_readings}.`,
             });
+            reading_links.push(l);
         } else if (position >= 0) {
-            // get next name
-            nxt = eBookConfig.readings[position + 1];
-            path_parts = cur_path_parts.slice(0, cur_path_parts.length - 2);
-            path_parts.push(nxt);
-            nxt_link = path_parts.join("/");
-            l = $("<a />", {
+            // still have more readings
+            let nxt = eBookConfig.readings[position + 1];
+            let nxt_link_parts = path_parts.slice(); // make a copy
+            nxt_link_parts.push(nxt);
+            let nxt_link = nxt_link_parts.join("/");
+            let l = $("<a />", {
                 name: "link",
                 class: "btn btn-lg reading-navigation buttonConfirmCompletion",
                 href: nxt_link,
@@ -71,23 +100,29 @@ function addReadingList() {
                     position + 2
                 } of ${num_readings} in the reading assignment.`,
             });
+            reading_links.push(l);
         } else {
-            l = $("<div />", {
+            // not in the reading assignment
+            let l = $("<div />", {
                 class: "reading-navigation no-assignment",
                 text: "This page is not part of the last reading assignment you visited.",
             });
+            reading_links.push(l);
         }
-        // check the body tag to see if it has a pretext class (no jquery)
-        if (ptxbook) {
-            //append l to the body
-            let pc = document.getElementById("scprogresscontainer");
-            if (pc) {
-                pc.style.marginBottom = "20px";
+
+        for (let l of reading_links) {
+            // check the body tag to see if it has a pretext class (no jquery)
+            if (ptxbook) {
+                //append l to the body
+                let pc = document.getElementById("scprogresscontainer");
+                if (pc) {
+                    pc.style.marginBottom = "20px";
+                }
+                pc.appendChild(l[0]);
+            } else {
+                $("#main-content").append(l);
             }
-            pc.appendChild(l[0]);
-            return;
         }
-        $("#main-content").append(l);
     }
 }
 

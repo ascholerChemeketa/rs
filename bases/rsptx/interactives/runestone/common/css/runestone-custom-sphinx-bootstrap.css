@@ -1221,3 +1221,9 @@ legend {
 .autopermalink {
     display: none;
 }
+
+.reading-navigation {
+    /* make reading navigation buttons always same size */
+    width: 100%;
+    margin: 0.5em 0;
+}
