@@ -546,7 +546,9 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"
         )
         if not endpoint:
-            raise LtiException("endpoint is not set in jwt body")
+            raise LtiException(
+                "endpoint is not set in jwt body for AssignmentsGradesService"
+            )
         return AssignmentsGradesService(connector, endpoint)
 
     def has_cgs(self) -> bool:
