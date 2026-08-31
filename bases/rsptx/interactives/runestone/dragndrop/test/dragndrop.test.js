@@ -914,6 +914,7 @@ describe("pointer controls", () => {
             value: { setData },
         });
 
+        expect(premise.getAttribute("data-ptx-image-dialog")).toBe("false");
         expect(image.draggable).toBe(false);
         image.dispatchEvent(dragStart);
         expect(setData).toHaveBeenCalledWith("draggableID", premise.id);

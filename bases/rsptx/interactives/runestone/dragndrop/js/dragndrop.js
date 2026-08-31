@@ -196,6 +196,8 @@ export default class DragNDrop extends RunestoneBase {
         replaceSpan.setAttribute("draggable", "true");
         replaceSpan.classList.add("draggable-drag");
         replaceSpan.classList.add("premise");
+        // opt out of PreTeXt image zoom
+        replaceSpan.setAttribute("data-ptx-image-dialog", "false");
         replaceSpan.tabIndex = 0;
         replaceSpan.setAttribute("role", "button");
         replaceSpan.dataset.category = category;
@@ -223,6 +225,8 @@ export default class DragNDrop extends RunestoneBase {
         replaceSpan.innerHTML = label;
         replaceSpan.id = id;
         replaceSpan.classList.add("draggable-drop", "drop-label", "response");
+        // opt out of PreTeXt image zoom
+        replaceSpan.setAttribute("data-ptx-image-dialog", "false");
         // Responses enter the tab order only while a premise is selected.
         replaceSpan.tabIndex = -1;
         replaceSpan.setAttribute("role", "button");
