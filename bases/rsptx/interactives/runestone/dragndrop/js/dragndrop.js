@@ -510,10 +510,13 @@ export default class DragNDrop extends RunestoneBase {
 
     setDragListeners(dgSpan) {
         dgSpan.setAttribute("aria-pressed", "false");
+        for (const image of dgSpan.querySelectorAll("img")) {
+            image.draggable = false;
+        }
         dgSpan.addEventListener("dragstart", (ev) => {
             this.deselectPremise();
             this.setPointerDragActive(true);
-            ev.dataTransfer.setData("draggableID", ev.target.id);
+            ev.dataTransfer.setData("draggableID", ev.currentTarget.id);
         });
         dgSpan.addEventListener("dragend", () => {
             this.setPointerDragActive(false);
@@ -530,7 +533,7 @@ export default class DragNDrop extends RunestoneBase {
                 var data = ev.dataTransfer.getData("draggableID");
                 var draggedSpan = document.getElementById(data);
                 if (
-                    draggedSpan != ev.target &&
+                    draggedSpan != ev.currentTarget &&
                     !this.strangerDanger(draggedSpan)
                 ) {
                     // Make sure element isn't already there--prevents errors w/appending child

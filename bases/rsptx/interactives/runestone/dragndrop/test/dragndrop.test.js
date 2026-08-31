@@ -893,6 +893,42 @@ describe("pointer controls", () => {
         expect(response.contains(premise)).toBe(true);
         expect(drop.defaultPrevented).toBe(true);
     });
+    it("uses the enclosing premise when dragging an image in a card", async () => {
+        const question = {
+            ...JSON_QUESTION,
+            left: JSON_QUESTION.left.map((item, index) =>
+                index === 0
+                    ? {
+                          ...item,
+                          label: '<img src="dog.png" alt="Dog">Dog',
+                      }
+                    : item,
+            ),
+        };
+        const dnd = await makeDnd({ question });
+        const premise = dnd.premiseArray[0];
+        const image = premise.querySelector("img");
+        const dragStart = new Event("dragstart", { bubbles: true });
+        const setData = vi.fn();
+        Object.defineProperty(dragStart, "dataTransfer", {
+            value: { setData },
+        });
+
+        expect(image.draggable).toBe(false);
+        image.dispatchEvent(dragStart);
+        expect(setData).toHaveBeenCalledWith("draggableID", premise.id);
+
+        const response = dnd.responseArray[0];
+        response.appendChild(premise);
+        const drop = new Event("drop", { bubbles: true, cancelable: true });
+        Object.defineProperty(drop, "dataTransfer", {
+            value: { getData: () => premise.id },
+        });
+        image.dispatchEvent(drop);
+
+        expect(premise.parentElement).toBe(response);
+    });
+
     it("highlights responses only while a premise is being dragged", async () => {
         const dnd = await makeDnd();
         const premise = dnd.premiseArray[0];
