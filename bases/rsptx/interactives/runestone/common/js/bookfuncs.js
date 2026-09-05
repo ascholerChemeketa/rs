@@ -1080,6 +1080,21 @@ async function handlePageSetup() {
             }
         }
     }
+
+    // PTX generated pages may have stale HTML. Forcibly re-render the content
+    // of the progress container.
+    const scprogresscontainer = document.getElementById(
+        "scprogresscontainer",
+    );
+    if (scprogresscontainer)
+        scprogresscontainer.innerHTML = `
+            <div id="scprogress-activity-count">
+                You have attempted <span id="scprogresstotal"></span> of
+                <span id="scprogressposs"></span> activities on this page.
+            </div>
+            <div id="subchapterprogress" aria-label="Page progress"></div>
+        `;
+
     console.log(`This page served by ${eBookConfig.served_by}`);
     if (eBookConfig.isLoggedIn) {
         mess = `username: ${eBookConfig.username}`;
