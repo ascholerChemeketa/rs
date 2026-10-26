@@ -1,0 +1,468 @@
+{
+    "code": "#include <iostream>\nusing namespace std;\n\nvoid add(int& x) {\n    x += 1; // increment x\n    cout << \"Inside add: \" << x << endl;\n}\n\nint main() {\n    int number = 5;\n    cout << \"Before add: \" << number << endl;\n    add(number);\n    cout << \"After add: \" << number << endl;\n}\n",
+    "trace": [
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 9,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 9,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 10,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 10,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 11,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            5
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 11,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 12,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            5
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "Before add: 5\n"
+        },
+        {
+            "event": "call",
+            "func_name": "add(int&)",
+            "globals": {},
+            "heap": {},
+            "line": 4,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            5
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "x": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "add(int&)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 4,
+                    "ordered_varnames": [
+                        "x"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "add(int&)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "Before add: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "add(int&)",
+            "globals": {},
+            "heap": {},
+            "line": 5,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            5
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "x": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0xFFF000BCC"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "add(int&)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 5,
+                    "ordered_varnames": [
+                        "x"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "add(int&)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "Before add: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "add(int&)",
+            "globals": {},
+            "heap": {},
+            "line": 6,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            6
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "x": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0xFFF000BCC"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "add(int&)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 6,
+                    "ordered_varnames": [
+                        "x"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "add(int&)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "Before add: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "add(int&)",
+            "globals": {},
+            "heap": {},
+            "line": 7,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            6
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "x": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0xFFF000BCC"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "add(int&)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 7,
+                    "ordered_varnames": [
+                        "x"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "add(int&)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "Before add: 5\nInside add: 6\n"
+        },
+        {
+            "event": "return",
+            "func_name": "add(int&)",
+            "globals": {},
+            "heap": {},
+            "line": 7,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            6
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "x": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0xFFF000BCC"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "add(int&)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 7,
+                    "ordered_varnames": [
+                        "x"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "add(int&)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "Before add: 5\nInside add: 6\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 13,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "number": [
+                            "C_DATA",
+                            "0xFFF000BCC",
+                            "int",
+                            6
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 13,
+                    "ordered_varnames": [
+                        "number"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "Before add: 5\nInside add: 6\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 14,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 14,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "Before add: 5\nInside add: 6\nAfter add: 6\n"
+        },
+        {
+            "event": "return",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 14,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 14,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "Before add: 5\nInside add: 6\nAfter add: 6\n"
+        }
+    ],
+    "startingInstruction": 0
+}

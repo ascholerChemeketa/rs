@@ -1,0 +1,1201 @@
+{
+    "code": "#include <iostream>\n#include <string>\n\nusing namespace std;\n\nint* makeMemory() {\n    int* p1 = new int(5);\n    cout << \"p1: \" << p1 << endl;\n    cout << \"p1 points to: \" << *p1 << endl;\n    // Do NOT delete the memory p1 points at...\n    // we will return that address and keep using it\n    return p1;\n}\n\nvoid borrowMemory(int* memoryAddress) {\n    cout << \"borrowedMemory: \" << memoryAddress << endl;\n    cout << \"Changing borrowedMemory to point to 10\" << endl;\n    *memoryAddress = 10; // Change the value at the memory address\n    cout << \"borrowedMemory points to: \" << *memoryAddress << endl;\n    // Do NOT delete the memory memoryAddress points at...\n    // it is just a copy of the memory address main \"owns\"\n}\n\nint main() {\n    // Call a function that allocates memory and returns a pointer\n    int* returnedPointer = makeMemory();\n\n    cout << \"returnedMemory: \" << returnedPointer << endl;\n    cout << \"returnedMemory points to: \" << *returnedPointer << endl;\n\n    // Pass the memory address to another function\n    // that will use the memory but not \"own\" it\n    borrowMemory(returnedPointer);\n\n    cout << \"returnedMemory is still: \" << returnedPointer << endl;\n    cout << \"returnedMemory points to: \" << *returnedPointer << endl;\n\n    // We are now done with the memory\n    delete returnedPointer;\n}\n",
+    "trace": [
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 24,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 24,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 26,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "call",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {},
+            "line": 6,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 6,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {},
+            "line": 7,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 6,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 8,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "p1": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 7,
+                    "ordered_varnames": [
+                        "p1"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": ""
+        },
+        {
+            "event": "step_line",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 9,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "p1": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 9,
+                    "ordered_varnames": [
+                        "p1"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 12,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "p1": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "p1"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 13,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "p1": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 12,
+                    "ordered_varnames": [
+                        "p1"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\n"
+        },
+        {
+            "event": "return",
+            "func_name": "makeMemory()",
+            "globals": {},
+            "heap": {},
+            "line": 13,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "makeMemory()",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 13,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "makeMemory()_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 28,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 26,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 29,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 29,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 33,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\n"
+        },
+        {
+            "event": "call",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 15,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "<UNINITIALIZED>"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 15,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 16,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 15,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 17,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 17,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        5
+                    ]
+                ]
+            },
+            "line": 18,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 18,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 19,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 19,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 22,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 22,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\n"
+        },
+        {
+            "event": "return",
+            "func_name": "borrowMemory(int*)",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 22,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": false,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 33,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                },
+                {
+                    "encoded_locals": {
+                        "memoryAddress": [
+                            "C_DATA",
+                            "0xFFF000B98",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BB0",
+                    "func_name": "borrowMemory(int*)",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 22,
+                    "ordered_varnames": [
+                        "memoryAddress"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "borrowMemory(int*)_0xFFF000BB0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 35,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 35,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 36,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 36,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\nreturnedMemory is still: 0x5c22040\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {
+                "0x5C22040": [
+                    "C_ARRAY",
+                    "0x5C22040",
+                    [
+                        "C_DATA",
+                        "0x5C22040",
+                        "int",
+                        10
+                    ]
+                ]
+            },
+            "line": 39,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {
+                        "returnedPointer": [
+                            "C_DATA",
+                            "0xFFF000BC8",
+                            "pointer",
+                            "0x5C22040"
+                        ]
+                    },
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 39,
+                    "ordered_varnames": [
+                        "returnedPointer"
+                    ],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\nreturnedMemory is still: 0x5c22040\nreturnedMemory points to: 10\n"
+        },
+        {
+            "event": "step_line",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 40,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 40,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\nreturnedMemory is still: 0x5c22040\nreturnedMemory points to: 10\n"
+        },
+        {
+            "event": "return",
+            "func_name": "main",
+            "globals": {},
+            "heap": {},
+            "line": 40,
+            "ordered_globals": [],
+            "stack_to_render": [
+                {
+                    "encoded_locals": {},
+                    "frame_id": "0xFFF000BE0",
+                    "func_name": "main",
+                    "is_highlighted": true,
+                    "is_parent": false,
+                    "is_zombie": false,
+                    "line": 40,
+                    "ordered_varnames": [],
+                    "parent_frame_id_list": [],
+                    "unique_hash": "main_0xFFF000BE0"
+                }
+            ],
+            "stdout": "p1: 0x5c22040\np1 points to: 5\nreturnedMemory: 0x5c22040\nreturnedMemory points to: 5\nborrowedMemory: 0x5c22040\nChanging borrowedMemory to point to 10\nborrowedMemory points to: 10\nreturnedMemory is still: 0x5c22040\nreturnedMemory points to: 10\n"
+        }
+    ],
+    "startingInstruction": 0
+}

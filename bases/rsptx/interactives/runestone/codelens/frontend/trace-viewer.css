@@ -1,0 +1,505 @@
+.rs-codelens-prototype {
+    container-type: inline-size;
+    box-sizing: border-box;
+    max-width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    background: var(--background, Canvas);
+    color: var(--bodyFont, CanvasText);
+}
+
+.rs-codelens-prototype__layout-control {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.rs-codelens-prototype__layout-control select {
+    max-width: 100%;
+    color: inherit;
+    background: var(--background, Canvas);
+}
+
+.rs-codelens-prototype__workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.rs-codelens-prototype__workspace > * {
+    min-width: 0;
+}
+
+.rs-codelens-prototype[data-layout="side-by-side"] .rs-codelens-prototype__workspace {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+}
+
+@container (min-width: 64rem) {
+    .rs-codelens-prototype[data-layout="auto"] .rs-codelens-prototype__workspace {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+}
+
+.rs-codelens-prototype h3 {
+    margin: 0.8rem 0 0.4rem;
+    font-size: 1.1em;
+}
+
+.rs-codelens-prototype h3:first-of-type {
+    margin-top: 0;
+}
+
+.rs-codelens-prototype__code,
+.rs-codelens-prototype__output {
+    max-width: 100%;
+    overflow: auto;
+    padding: 0.5rem;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    background: var(--codeBlockBg, Canvas);
+    color: var(--bodyFont, CanvasText);
+    white-space: pre;
+}
+
+.rs-codelens-prototype__line {
+    display: block;
+    min-width: max-content;
+}
+
+.rs-codelens-prototype__line--current {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+    background: var(--codeHighlightBg, transparent);
+}
+
+.rs-codelens-prototype__line-number {
+    display: inline-block;
+    min-width: 2.5em;
+    margin-right: 0.8em;
+    border-right: 1px solid currentColor;
+    text-align: right;
+    padding-right: 0.5em;
+    user-select: none;
+}
+
+.rs-codelens-prototype__current-label,
+.rs-codelens-prototype__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.rs-codelens-prototype__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.rs-codelens-prototype button {
+    padding: 0.35em 0.8em;
+    border: 1px solid currentColor;
+    border-radius: 0.25em;
+    background: var(--background, ButtonFace);
+    color: var(--bodyFont, ButtonText);
+    cursor: pointer;
+}
+
+.rs-codelens-prototype button:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+.rs-codelens-prototype button[aria-disabled="true"] {
+    cursor: default;
+}
+
+.rs-codelens-prototype__memory {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rs-codelens-prototype__memory th,
+.rs-codelens-prototype__memory td {
+    padding: 0.25em 0.5em;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    text-align: left;
+    vertical-align: top;
+}
+
+.rs-codelens-memory {
+    --cl-surface: var(--background, Canvas);
+    --cl-ink: var(--bodyFont, CanvasText);
+    --cl-border: color-mix(in srgb, var(--cl-ink) 45%, var(--cl-surface));
+    container-type: inline-size;
+}
+
+.rs-codelens-memory__view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    border-radius: 0.5rem;
+    min-width: 0;
+}
+
+.rs-codelens-memory__view-controls legend {
+    float: none;
+    width: auto;
+    padding: 0 0.3rem;
+    margin: 0;
+    font-size: 1em;
+    color: inherit;
+}
+
+.rs-codelens-memory__view-controls label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+}
+
+.rs-codelens-memory__help,
+.rs-codelens-memory__empty {
+    margin: 0.5rem 0;
+}
+
+.rs-codelens-memory__stage {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, var(--cl-stack-width, 16rem)) minmax(0, var(--cl-heap-width, 16rem));
+    gap: 2rem;
+    padding-inline-end: 2.5rem;
+}
+
+.rs-codelens-memory__stage[data-view="diagram"],
+.rs-codelens-memory__stage[data-view="graphical"] {
+    font-size: 90%;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card {
+    padding: 0.5rem;
+    margin-bottom: 0.65rem;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__column h4 {
+    padding: 0.2rem 0.4rem;
+    margin-bottom: 0.35rem;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card h5 {
+    margin-bottom: 0.3rem;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card p {
+    margin: 0.2rem 0 0.3rem;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) th,
+.rs-codelens-memory__stage:not([data-view="text"]) td {
+    padding: 0.25em 0.5em;
+}
+
+.rs-codelens-memory__stage:not([data-view="text"]) th:first-child {
+    width: 38%;
+}
+
+.rs-codelens-memory__column {
+    --cl-card-bg: color-mix(in srgb, var(--cl-accent) var(--codelens-memory-tint, 10%), var(--cl-surface));
+    --cl-name-bg: color-mix(in srgb, var(--cl-ink) 7%, var(--cl-surface));
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    /* Keep the space between cards clear for connector routing. */
+}
+
+.rs-codelens-memory__column--stack {
+    --cl-accent: #3b82f6;
+}
+
+.rs-codelens-memory__column--heap {
+    --cl-accent: #14b8a6;
+}
+
+.rs-codelens-memory__column h4 {
+    font-size: 1.05em;
+    margin: 0.75rem 0 0.5rem;
+    padding: 0.3rem 0.65rem;
+    border-inline-start: 0.25rem solid var(--cl-accent);
+    border-radius: 0.25rem;
+    background: var(--cl-card-bg, var(--cl-surface));
+}
+
+.rs-codelens-memory__card {
+    margin-bottom: 1rem;
+    padding: 0.65rem;
+    border: 2px solid var(--cl-accent);
+    border-radius: 0.5rem;
+    background: var(--cl-card-bg, var(--cl-surface));
+    box-shadow: 0 2px 4px color-mix(in srgb, var(--cl-ink) 8%, transparent);
+    color: var(--bodyFont, CanvasText);
+    overflow-wrap: anywhere;
+}
+
+.rs-codelens-memory__card h5 {
+    margin: 0 0 0.5rem;
+    font-size: 1em;
+    font-weight: bold;
+    scroll-margin-top: 1rem;
+}
+
+.rs-codelens-memory__card p {
+    margin: 0.3rem 0 0.5rem;
+}
+
+.rs-codelens-memory__card table {
+    table-layout: fixed;
+}
+
+.rs-codelens-memory__card th,
+.rs-codelens-memory__card td {
+    border-color: var(--cl-border);
+}
+
+.rs-codelens-memory__card th {
+    background: var(--cl-name-bg, var(--cl-surface));
+}
+
+.rs-codelens-memory__card th[scope="row"],
+.rs-codelens-memory__card td {
+    background: var(--cl-surface);
+}
+
+.rs-codelens-memory__card th:first-child {
+    width: 30%;
+}
+
+.rs-codelens-memory__card .rs-codelens-memory__table--value-only th:first-child {
+    width: auto;
+}
+
+.rs-codelens-memory__variable-metadata {
+    display: block;
+    margin-top: 0.15em;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+.rs-codelens-memory__variable-metadata > span {
+    display: block;
+}
+
+.rs-codelens-memory__aggregate-cell > table {
+    min-width: 12rem;
+    table-layout: auto;
+}
+
+.rs-codelens-memory__card .rs-codelens-memory__aggregate-cell > table > :is(thead, tbody) > tr > th:first-child {
+    width: auto;
+}
+
+.rs-codelens-memory__card .rs-codelens-memory__table--aggregate > :is(thead, tbody) > tr > th:first-child {
+    width: 28%;
+}
+
+/* A field change marks its own cell, without framing all enclosing structs. */
+.rs-codelens-memory__row--changed > td {
+    border-inline-end: 0.25rem solid currentColor;
+}
+
+.rs-codelens-memory__card--active {
+    border-inline-start: 0.3rem solid currentColor;
+}
+
+.rs-codelens-memory__frame-status {
+    font-weight: bold;
+}
+
+.rs-codelens-memory__reference,
+.rs-codelens-memory__card a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.rs-codelens-memory a:focus-visible,
+.rs-codelens-memory input:focus-visible,
+.rs-codelens-memory summary:focus-visible,
+.rs-codelens-memory [tabindex="-1"]:focus {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+.rs-codelens-memory__card--referenced,
+.rs-codelens-memory__target--referenced {
+    outline: 2px dashed currentColor;
+    outline-offset: 2px;
+}
+
+.rs-codelens-memory__changed {
+    display: inline-block;
+    margin-inline-start: 0.4rem;
+    padding: 0 0.25rem;
+    border: 1px solid currentColor;
+    border-radius: 0.2rem;
+    font: 0.8em/1.4 system-ui, sans-serif;
+}
+
+.rs-codelens-memory__raw {
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: inherit;
+    background: inherit;
+}
+
+.rs-codelens-memory__connectors {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* Above cards so the short segment from a value cell crosses card padding. */
+    z-index: 2;
+    overflow: visible;
+    pointer-events: none;
+    color: inherit;
+}
+
+.rs-codelens-memory__connectors marker path {
+    fill: currentColor;
+}
+
+.rs-codelens-memory__edge {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    opacity: 0.6;
+}
+
+.rs-codelens-memory__edge--active {
+    stroke-width: 3;
+    opacity: 1;
+}
+
+.rs-codelens-memory__changes {
+    margin: 0.75rem 0;
+}
+
+.rs-codelens-memory__changes summary {
+    cursor: pointer;
+}
+
+.rs-codelens-memory__stage[data-view="text"] {
+    display: block;
+    padding-inline-end: 0;
+}
+
+.rs-codelens-memory__stage[data-view="text"] .rs-codelens-memory__connectors {
+    display: none;
+}
+
+@media (max-width: 42rem) {
+    .rs-codelens-memory__stage {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+}
+
+@container (max-width: 26rem) {
+    .rs-codelens-memory__stage[data-view="diagram"] {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+}
+
+@container (max-width: 56rem) {
+    .rs-codelens-memory__stage[data-view="diagram"][data-has-nested="true"] {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+}
+
+.rs-codelens-memory__move-handle {
+    display: none;
+}
+
+.rs-codelens-memory__viewport[data-view="graphical"] {
+    max-height: 40rem;
+    overflow: auto;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    border-radius: 0.5rem;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] {
+    grid-template-columns: var(--cl-stack-width, 16rem) max-content;
+    gap: 2rem;
+    width: max-content;
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 0 2.5rem 0.65rem 0.4rem;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__heap-canvas {
+    position: relative;
+    min-width: 20rem;
+    min-height: 16rem;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] [data-heap-id] {
+    position: absolute;
+    width: var(--cl-card-width, 16rem);
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__move-handle {
+    display: block;
+    margin: 0 0 0.3rem;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__dragging {
+    cursor: grabbing;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__card--selected {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+.rs-codelens-memory__graph-controls {
+    margin: 0.75rem 0;
+}
+
+.rs-codelens-memory__movement {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.75rem 0;
+}
+
+.rs-codelens-memory__movement select {
+    max-width: 100%;
+    color: inherit;
+    background: var(--background, Canvas);
+}
+
+.rs-codelens-memory__stage[data-has-heap="false"] {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 0;
+    padding-inline: 0;
+}

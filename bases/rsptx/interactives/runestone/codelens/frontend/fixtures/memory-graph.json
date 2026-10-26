@@ -1,0 +1,546 @@
+{
+    "code": "def visit(node):\n    alias = node\n    node[\"values\"].append(3)\n    return alias\n\nshared = [1, 2]\nnode = {\"values\": shared}\nnode[\"self\"] = node\nresult = visit(node)\n",
+    "startingInstruction": 6,
+    "trace": [
+        {
+            "line": 1,
+            "event": "step_line",
+            "func_name": "<module>",
+            "globals": {},
+            "ordered_globals": [],
+            "heap": {},
+            "stdout": "",
+            "stack_to_render": []
+        },
+        {
+            "line": 6,
+            "event": "step_line",
+            "func_name": "<module>",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ]
+            },
+            "ordered_globals": [
+                "visit"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": []
+        },
+        {
+            "line": 7,
+            "event": "step_line",
+            "func_name": "<module>",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": []
+        },
+        {
+            "line": 8,
+            "event": "step_line",
+            "func_name": "<module>",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": []
+        },
+        {
+            "line": 9,
+            "event": "step_line",
+            "func_name": "<module>",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": []
+        },
+        {
+            "line": 2,
+            "event": "call",
+            "func_name": "visit",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": [
+                {
+                    "func_name": "visit",
+                    "frame_id": 1,
+                    "parent_frame_id_list": [],
+                    "encoded_locals": {
+                        "node": [
+                            "REF",
+                            3
+                        ]
+                    },
+                    "ordered_varnames": [
+                        "node"
+                    ],
+                    "is_highlighted": true,
+                    "is_zombie": false
+                }
+            ]
+        },
+        {
+            "line": 3,
+            "event": "step_line",
+            "func_name": "visit",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": [
+                {
+                    "func_name": "visit",
+                    "frame_id": 1,
+                    "parent_frame_id_list": [],
+                    "encoded_locals": {
+                        "node": [
+                            "REF",
+                            3
+                        ],
+                        "alias": [
+                            "REF",
+                            3
+                        ]
+                    },
+                    "ordered_varnames": [
+                        "node",
+                        "alias"
+                    ],
+                    "is_highlighted": true,
+                    "is_zombie": false
+                }
+            ]
+        },
+        {
+            "line": 4,
+            "event": "step_line",
+            "func_name": "visit",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2,
+                    3
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": [
+                {
+                    "func_name": "visit",
+                    "frame_id": 1,
+                    "parent_frame_id_list": [],
+                    "encoded_locals": {
+                        "node": [
+                            "REF",
+                            3
+                        ],
+                        "alias": [
+                            "REF",
+                            3
+                        ]
+                    },
+                    "ordered_varnames": [
+                        "node",
+                        "alias"
+                    ],
+                    "is_highlighted": true,
+                    "is_zombie": false
+                }
+            ]
+        },
+        {
+            "line": 4,
+            "event": "return",
+            "func_name": "visit",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2,
+                    3
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": [
+                {
+                    "func_name": "visit",
+                    "frame_id": 1,
+                    "parent_frame_id_list": [],
+                    "encoded_locals": {
+                        "node": [
+                            "REF",
+                            3
+                        ],
+                        "alias": [
+                            "REF",
+                            3
+                        ],
+                        "__return__": [
+                            "REF",
+                            3
+                        ]
+                    },
+                    "ordered_varnames": [
+                        "node",
+                        "alias",
+                        "__return__"
+                    ],
+                    "is_highlighted": true,
+                    "is_zombie": false
+                }
+            ]
+        },
+        {
+            "line": 9,
+            "event": "return",
+            "func_name": "<module>",
+            "globals": {
+                "visit": [
+                    "REF",
+                    1
+                ],
+                "shared": [
+                    "REF",
+                    2
+                ],
+                "node": [
+                    "REF",
+                    3
+                ],
+                "result": [
+                    "REF",
+                    3
+                ]
+            },
+            "ordered_globals": [
+                "visit",
+                "shared",
+                "node",
+                "result"
+            ],
+            "heap": {
+                "1": [
+                    "FUNCTION",
+                    "visit(node)",
+                    null
+                ],
+                "2": [
+                    "LIST",
+                    1,
+                    2,
+                    3
+                ],
+                "3": [
+                    "DICT",
+                    [
+                        "values",
+                        [
+                            "REF",
+                            2
+                        ]
+                    ],
+                    [
+                        "self",
+                        [
+                            "REF",
+                            3
+                        ]
+                    ]
+                ]
+            },
+            "stdout": "",
+            "stack_to_render": []
+        }
+    ]
+}

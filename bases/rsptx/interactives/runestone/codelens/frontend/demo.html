@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>CodeLens trace viewer prototype</title>
+        <link rel="stylesheet" href="./trace-viewer.css" />
+        <style>
+            html { color-scheme: light; }
+            html[data-theme="dark"] { color-scheme: dark; --codelens-memory-tint: 10%; }
+            body { max-width: 70rem; margin: 1rem auto; padding: 0 1rem; font: 1rem/1.5 system-ui, sans-serif; }
+            .demo-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <h1>CodeLens trace viewer prototype</h1>
+        <p>This page reads existing Python, Java, and C++ trace snapshots. Explore stack frames and heap objects in Diagram, Graphical Diagram, or Text view. Questions and input are outside this prototype.</p>
+        <div class="demo-controls">
+            <label for="trace">Trace</label>
+            <select id="trace">
+                <option value="hello-world">Python: Hello World</option>
+                <option value="loop-output">Python: Loop and output</option>
+                <option value="sieve">Python: Sieve (stack and list)</option>
+                <option value="aliasing">Python: Shared references</option>
+                <option value="memory-graph">Python: Calls, aliases, and a cycle</option>
+                <option value="java-hello-world" data-lang="java">Java: Hello World</option>
+                <option value="java-sieve" data-lang="java">Java: Sieve (boolean array)</option>
+                <option value="cpp-sieve" data-lang="cpp">C++: Sieve (array)</option>
+                <option value="cpp-class-pointers" data-lang="cpp">C++: Classes and pointers</option>
+                <option value="cpp-passing-pointers" data-lang="cpp">C++: Passing pointers</option>
+                <option value="cpp-references-functions" data-lang="cpp">C++: References and functions</option>
+            </select>
+            <label><input id="dark-theme" type="checkbox" /> Dark theme</label>
+        </div>
+        <p id="trace-note" hidden>Java and C++ support is experimental. Unsupported encodings appear as raw trace data. Pointer links resolve addresses present in the current snapshot; language-specific frame ordering still needs work.</p>
+        <p id="error" role="alert" hidden></p>
+        <div id="viewer"></div>
+        <script type="importmap">
+            {"imports": {
+                "./elk-layout.js": "./elk-layout.js?v=4",
+                "./memory-view.js": "./memory-view.js?v=8",
+                "./memory-model.js": "./memory-model.js?v=5",
+                "./frontend-i18n.en.js": "./frontend-i18n.en.js?v=6",
+                "./graphical-heap.js": "./graphical-heap.js?v=4"
+            }}
+        </script>
+        <script type="module" src="./demo.js?v=3"></script>
+    </body>
+</html>

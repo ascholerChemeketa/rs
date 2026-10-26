@@ -14,22 +14,26 @@
 import RunestoneBase from "../../common/js/runestonebase.js";
 import "./pytutor-embed.bundle.js";
 import "./../css/pytutor.css";
+import { mountTraceViewer } from "../frontend/trace-viewer.js";
+import "../frontend/trace-viewer.css";
 
 function attachLoggers(codelens, divid) {
     let rb = new RunestoneBase();
-    codelens.domRoot.find("#jmpFirstInstr").click(function () {
-        rb.logBookEvent({ event: "codelens", act: "first", div_id: divid });
-    });
-    codelens.domRoot.find("#jmpLastInstr").click(function () {
-        rb.logBookEvent({ event: "codelens", act: "last", div_id: divid });
-    });
-    codelens.domRoot.find("#jmpStepBack").click(function () {
-        rb.logBookEvent({ event: "codelens", act: "back", div_id: divid });
-    });
-    codelens.domRoot.find("#jmpStepFwd").click(function () {
-        rb.logBookEvent({ event: "codelens", act: "fwd", div_id: divid });
-    });
-    codelens.domRoot.find("#executionSlider").bind("slide", function (evt, ui) {
+    const root = document.getElementById(divid);
+    for (const [buttonId, action] of [
+        ["jmpFirstInstr", "first"],
+        ["jmpLastInstr", "last"],
+        ["jmpStepBack", "back"],
+        ["jmpStepFwd", "fwd"],
+    ]) {
+        root.querySelector(
+            `#${buttonId}, [data-codelens-action="${action}"]`,
+        )?.addEventListener("click", () => {
+            rb.logBookEvent({ event: "codelens", act: action, div_id: divid });
+        });
+    }
+    // The legacy jQuery UI slider emits a jQuery event rather than a DOM event.
+    codelens.domRoot?.find("#executionSlider").bind("slide", function () {
         rb.logBookEvent({ event: "codelens", act: "slide", div_id: divid });
     });
     // TODO: The component isn't quite fully initialized, but it also doesn't inherit from RunestoneBase. This is a convenient place to mark it ready for now, but it should be moved forward in time during a rewrite.
@@ -38,14 +42,44 @@ function attachLoggers(codelens, divid) {
 }
 
 function styleButtons(divid) {
-    var myVis = $("#" + divid);
-    $(myVis).find("#jmpFirstInstr").addClass("btn btn-default");
-    $(myVis).find("#jmpStepBack").addClass("btn btn-danger");
-    $(myVis).find("#jmpStepFwd").addClass("btn btn-success");
-    $(myVis).find("#jmpLastInstr").addClass("btn btn-default");
+    const root = document.getElementById(divid);
+    for (const [buttonId, buttonClass, action] of [
+        ["jmpFirstInstr", "btn-default"],
+        ["jmpStepBack", "btn-danger"],
+        ["jmpStepFwd", "btn-success", "fwd"],
+        ["jmpLastInstr", "btn-default"],
+    ]) {
+        const selector = action
+            ? `#${buttonId}, [data-codelens-action="${action}"]`
+            : `#${buttonId}`;
+        root.querySelector(selector)?.classList.add("btn", buttonClass);
+    }
 }
 
-if (typeof allVsualizers === "undefined") {
+function renderVisualizer(data, divid, lang) {
+    const options = {
+        startingInstruction: data.startingInstruction || 0,
+        editCodeBaseURL: null,
+        hideCode: false,
+        lang: lang,
+    };
+    const usePrototype =
+        Array.isArray(data.trace) &&
+        data.trace.length > 0 &&
+        new URLSearchParams(window.location.search).get("codelensPrototype") ===
+            divid &&
+        !data.trace.some(
+            (entry) =>
+                entry.question ||
+                entry.event === "raw_input" ||
+                entry.event === "mouse_input",
+        );
+    return usePrototype
+        ? mountTraceViewer(document.getElementById(divid), data, options)
+        : addVisualizerToPage(data, divid, options);
+}
+
+if (typeof window.allVisualizers === "undefined") {
     window.allVisualizers = [];
 }
 
@@ -64,13 +98,7 @@ window.component_factory.codelens = function (opts) {
     // allTraceData is created by a series of script tags that when loaded create this
     // as a global object containing trace information.
     try {
-        let startInstr = allTraceData[divid].startingInstruction || 0;
-        let vis = addVisualizerToPage(allTraceData[divid], divid, {
-            startingInstruction: startInstr,
-            editCodeBaseURL: null,
-            hideCode: false,
-            lang: lang,
-        });
+        let vis = renderVisualizer(allTraceData[divid], divid, lang);
         attachLoggers(vis, divid);
         styleButtons(divid);
         window.allVisualizers.push(vis);
@@ -79,19 +107,20 @@ window.component_factory.codelens = function (opts) {
         console.log(err);
     }
 
-    window.addEventListener("codelens:answer", function (evt) {
-        let rb = new RunestoneBase();
-        rb.logBookEvent({
-            event: "codelens",
-            div_id: evt.detail.divid,
-            act: "answer",
-            answer: evt.detail.answer,
-            correct: evt.detail.correct,
-            percent: evt.detail.percent || 0,
-        });
-        console.log(evt);
-    });
 };
+
+window.addEventListener("codelens:answer", function (evt) {
+    let rb = new RunestoneBase();
+    rb.logBookEvent({
+        event: "codelens",
+        div_id: evt.detail.divid,
+        act: "answer",
+        answer: evt.detail.answer,
+        correct: evt.detail.correct,
+        percent: evt.detail.percent || 0,
+    });
+    console.log(evt);
+});
 
 // After all of the libraries are loaded...
 $(document).on("runestone:login-complete", function () {
@@ -102,17 +131,10 @@ $(document).on("runestone:login-complete", function () {
                 console.log(`Could not find element with id ${divid}`);
                 return;
             }
-            let lang = $(cl).data("params").lang;
+            let lang = JSON.parse(cl.dataset.params).lang;
             try {
                 if (divid in window.allTraceData) {
-                    let startInstr =
-                        allTraceData[divid].startingInstruction || 0;
-                    var vis = addVisualizerToPage(allTraceData[divid], divid, {
-                        startingInstruction: startInstr,
-                        editCodeBaseURL: null,
-                        hideCode: false,
-                        lang: lang,
-                    });
+                    var vis = renderVisualizer(allTraceData[divid], divid, lang);
                 } else {
                     alert(
                         `${divid} is missing trace data.  This is probably a build error. Please report it on github.`,
@@ -126,17 +148,5 @@ $(document).on("runestone:login-complete", function () {
                 console.log(err);
             }
         }
-        window.addEventListener("codelens:answer", function (evt) {
-            let rb = new RunestoneBase();
-            rb.logBookEvent({
-                event: "codelens",
-                div_id: evt.detail.divid,
-                act: "answer",
-                answer: evt.detail.answer,
-                correct: evt.detail.correct,
-                percent: evt.detail.percent || 0,
-            });
-            console.log(evt);
-        });
     }
 });

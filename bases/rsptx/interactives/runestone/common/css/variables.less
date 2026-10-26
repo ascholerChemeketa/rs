@@ -18,6 +18,7 @@
 :root {
     // --- Global theme (light) ---
     --background: #ffffff;
+    --codelens-memory-tint: 10%;
     --outerBackground: #eeeeee;
     --links: #0645ad;
     --bodyFont: var(--body-text-color, #000000);
@@ -96,6 +97,7 @@
 
 :root.dark-mode {
     --background: #2c2f33;
+    --codelens-memory-tint: 10%;
     --outerBackground: #23272a;
     // #7289da was 4.04:1 on this background; #8ab4f8 clears 4.5 on every
     // dark surface below and still reads as a link next to --bodyFont.
@@ -180,6 +182,7 @@
 
 [data-theme="dark"] {
     --background: #2c2f33;
+    --codelens-memory-tint: 10%;
     --outerBackground: #23272a;
     --links: #8ab4f8;   // was #7289da = 4.04:1 on --background
     --bodyFont: #c8d2d7; // was #99aab5 = 2.97:1 on --questionBgColor
