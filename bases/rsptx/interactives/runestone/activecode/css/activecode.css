@@ -75,6 +75,12 @@
     background-color: inherit;
 }
 
+.ac_duck_api_result {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 0.5em 0;
+}
+
 /* Keep visible output available for navigation without reserving space before
    the first run. The separate, pre-mounted status announces completed output. */
 .ac_output--collapsed {

@@ -46,6 +46,7 @@ window.vegaEmbed = embed;
 
 var isMouseDown = false;
 var stopExecution = false;
+const DUCK_API_PROXY_URL = "/ns/rsproxy/experiments/rdaas/api/duck";
 
 document.onmousedown = function () {
     isMouseDown = true;
@@ -101,6 +102,12 @@ export class ActiveCode extends RunestoneBase {
         this.containerDiv = opts.orig;
         this.subheadingTagName = getSubheadingTagName(opts.orig);
         this.useRunestoneServices = opts.useRunestoneServices;
+        this.duckApiEnabled = this.parseBooleanAttribute(
+            opts.orig,
+            "data-duck-api",
+        );
+        this.duckApiResult = null;
+        this.duckRequestNumber = 0;
         this.python3 = true;
         this.origElem = orig;
         this.origText = this.origElem.textContent;
@@ -265,6 +272,9 @@ export class ActiveCode extends RunestoneBase {
         this.lockGutterLines = [];
 
         this.createEditor();
+        if (this.duckApiEnabled) {
+            this.createDuckApiResult();
+        }
         this.createOutput();
         // Keep the output mounted so assistive technology registers its live
         // region before the first run, but do not reserve empty visual space.
@@ -703,6 +713,9 @@ export class ActiveCode extends RunestoneBase {
             }
         }, 150);
         this.showOutput();
+        if (this.duckApiEnabled) {
+            void this.showDuckApiResult();
+        }
 
         try {
             // Reset the CSS that indicates the editor needs saving.
@@ -737,6 +750,50 @@ export class ActiveCode extends RunestoneBase {
         // Keep the visible output available for navigation without reserving
         // visual space before the first run. The separate status announces it.
         this.outDiv.classList.remove("ac_output--collapsed");
+    }
+
+    createDuckApiResult() {
+        const result = document.createElement("div");
+        result.classList.add("ac_duck_api_result");
+        result.setAttribute("role", "status");
+        result.setAttribute("aria-live", "polite");
+        result.textContent = "Run code to request the Duck API.";
+        this.codeDiv.insertAdjacentElement("afterend", result);
+        this.duckApiResult = result;
+    }
+
+    async showDuckApiResult() {
+        const requestNumber = ++this.duckRequestNumber;
+        if (!this.useRunestoneServices) {
+            this.duckApiResult.textContent =
+                "Duck API: available on the hosted Runestone page.";
+            return;
+        }
+
+        this.duckApiResult.textContent = "Duck API: loading...";
+        try {
+            const response = await fetch(DUCK_API_PROXY_URL);
+            const raw = await response.text();
+            let display = raw;
+            let jsonContent = {};
+            if (response.headers.get("Content-Type")?.includes("application/json")) {
+                try {
+                    jsonContent = JSON.parse(raw);
+                    display = JSON.stringify(jsonContent, null, 2);
+                } catch (_) {
+                    // Show the raw response if the upstream's JSON is malformed.
+                }
+            }
+            if (requestNumber === this.duckRequestNumber) {
+                this.duckApiResult.textContent =
+                    `Duck API:\n${jsonContent.tip || display}`;
+            }
+        } catch (error) {
+            if (requestNumber === this.duckRequestNumber) {
+                this.duckApiResult.textContent =
+                    `Duck API request failed: ${error.message}`;
+            }
+        }
     }
 
     setRunAnnouncementsSuppressed(suppress) {
