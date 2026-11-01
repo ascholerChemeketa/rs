@@ -178,7 +178,7 @@
     isolation: isolate;
     display: grid;
     grid-template-columns: minmax(0, var(--cl-stack-width, 16rem)) minmax(0, var(--cl-heap-width, 16rem));
-    gap: 2rem;
+    gap: 1.5rem;
     padding-inline-end: 2.5rem;
 }
 
@@ -188,17 +188,22 @@
 }
 
 .rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card {
-    padding: 0.5rem;
-    margin-bottom: 0.65rem;
+    padding: 0.4rem;
+    margin-bottom: 0.5rem;
 }
 
 .rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__column h4 {
-    padding: 0.2rem 0.4rem;
-    margin-bottom: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    margin: 0.25rem 0 0.4rem;
 }
 
-.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card h5 {
-    margin-bottom: 0.3rem;
+/* A heading strip across the top of each card. */
+.rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card-header {
+    margin: -0.4rem -0.4rem 0.4rem;
+    padding: 0.2rem 0.5rem;
+    border-bottom: 1px solid var(--cl-card-border);
+    border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
+    background: var(--cl-head-bg);
 }
 
 .rs-codelens-memory__stage:not([data-view="text"]) .rs-codelens-memory__card p {
@@ -210,12 +215,23 @@
     padding: 0.25em 0.5em;
 }
 
+/* Name/Value headings stay in the table for assistive technology, but take no
+   visible space. The cells keep their widths for the fixed table layout. */
+.rs-codelens-memory__stage:not([data-view="text"]) thead th {
+    padding-block: 0;
+    border-block-width: 0;
+    font-size: 0;
+    line-height: 0;
+}
+
 .rs-codelens-memory__stage:not([data-view="text"]) th:first-child {
     width: 38%;
 }
 
 .rs-codelens-memory__column {
     --cl-card-bg: color-mix(in srgb, var(--cl-accent) var(--codelens-memory-tint, 10%), var(--cl-surface));
+    --cl-head-bg: color-mix(in srgb, var(--cl-accent) calc(var(--codelens-memory-tint, 10%) * 2.2), var(--cl-surface));
+    --cl-card-border: color-mix(in srgb, var(--cl-accent) 55%, var(--cl-surface));
     --cl-name-bg: color-mix(in srgb, var(--cl-ink) 7%, var(--cl-surface));
     position: relative;
     z-index: 1;
@@ -243,19 +259,39 @@
 .rs-codelens-memory__card {
     margin-bottom: 1rem;
     padding: 0.65rem;
-    border: 2px solid var(--cl-accent);
+    border: 1px solid var(--cl-card-border, var(--cl-accent));
     border-radius: 0.5rem;
     background: var(--cl-card-bg, var(--cl-surface));
-    box-shadow: 0 2px 4px color-mix(in srgb, var(--cl-ink) 8%, transparent);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--cl-ink) 12%, transparent);
     color: var(--bodyFont, CanvasText);
     overflow-wrap: anywhere;
 }
 
+.rs-codelens-memory__card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
 .rs-codelens-memory__card h5 {
-    margin: 0 0 0.5rem;
+    flex: 1 1 auto;
+    margin: 0;
     font-size: 1em;
     font-weight: bold;
     scroll-margin-top: 1rem;
+}
+
+.rs-codelens-memory__badge,
+.rs-codelens-memory__card-header > .rs-codelens-memory__changed {
+    display: inline-block;
+    margin: 0;
+    padding: 0 0.35rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font: 0.8em/1.4 system-ui, sans-serif;
+    white-space: nowrap;
 }
 
 .rs-codelens-memory__card p {
@@ -289,14 +325,13 @@
 }
 
 .rs-codelens-memory__variable-metadata {
-    display: block;
-    margin-top: 0.15em;
-    font-size: 0.8em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+    margin-top: 0.1em;
+    font-size: 0.75em;
     font-weight: normal;
-}
-
-.rs-codelens-memory__variable-metadata > span {
-    display: block;
+    color: color-mix(in srgb, var(--cl-ink) 72%, var(--cl-surface));
 }
 
 .rs-codelens-memory__aggregate-cell > table {
@@ -318,11 +353,15 @@
 }
 
 .rs-codelens-memory__card--active {
-    border-inline-start: 0.3rem solid currentColor;
+    border-inline-start: 0.3rem solid color-mix(in srgb, var(--cl-accent) 70%, var(--cl-ink));
 }
 
 .rs-codelens-memory__frame-status {
     font-weight: bold;
+}
+
+.rs-codelens-memory__card-header a {
+    font-weight: normal;
 }
 
 .rs-codelens-memory__reference,
@@ -442,17 +481,17 @@
 
 .rs-codelens-memory__stage[data-view="graphical"] {
     grid-template-columns: var(--cl-stack-width, 16rem) max-content;
-    gap: 2rem;
+    gap: 1.5rem;
     width: max-content;
     min-width: 100%;
     box-sizing: border-box;
-    padding: 0 2.5rem 0.65rem 0.4rem;
+    padding: 0 2.5rem 0.5rem 0.4rem;
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__heap-canvas {
     position: relative;
-    min-width: 20rem;
-    min-height: 16rem;
+    min-width: 16rem;
+    min-height: 10rem;
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] [data-heap-id] {
@@ -463,11 +502,25 @@
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__move-handle {
-    display: block;
-    margin: 0 0 0.3rem;
+    display: inline-flex;
+    order: 1;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+    border-color: var(--cl-card-border);
+    background: var(--cl-surface);
     touch-action: none;
     cursor: grab;
     user-select: none;
+}
+
+.rs-codelens-memory__move-handle svg {
+    width: 0.65em;
+    height: 1em;
+    fill: currentColor;
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__dragging {

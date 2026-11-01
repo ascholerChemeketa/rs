@@ -121,8 +121,8 @@ export function createGraphicalHeap({ canvas, prefix, onChange }) {
 
     function applyPositions() {
         if (!enabled) return;
-        let width = 320;
-        let height = 260;
+        let width = 256;
+        let height = 160;
         for (const [id, card] of cards) {
             const position = positions.get(id);
             if (!position) continue;
@@ -254,7 +254,23 @@ export function createGraphicalHeap({ canvas, prefix, onChange }) {
     }
 
     function addHandle(card, id) {
-        const handle = element("button", t("cl_move_node", card.querySelector("h5").textContent));
+        // An icon-sized grip; its visually hidden text remains the accessible name.
+        const handle = element("button");
+        const name = element("span", t("cl_move_node", card.querySelector("h5").textContent));
+        name.className = "rs-codelens-prototype__sr-only";
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        icon.setAttribute("viewBox", "0 0 10 16");
+        icon.setAttribute("aria-hidden", "true");
+        icon.setAttribute("focusable", "false");
+        for (const [cx, cy] of [[3, 3], [7, 3], [3, 8], [7, 8], [3, 13], [7, 13]]) {
+            const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            dot.setAttribute("cx", cx);
+            dot.setAttribute("cy", cy);
+            dot.setAttribute("r", "1.4");
+            icon.append(dot);
+        }
+        handle.append(icon, name);
+        handle.title = name.textContent;
         handle.type = "button";
         handle.className = "rs-codelens-memory__move-handle";
         handle.dataset.memoryFocus = JSON.stringify(["heap", id, "move"]);

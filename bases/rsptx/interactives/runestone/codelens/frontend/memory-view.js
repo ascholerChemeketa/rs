@@ -246,11 +246,13 @@ export function createMemoryView({ hasHeap = true } = {}) {
             if (typeof row.name === "string") label.textContent = row.name;
             else label.append(renderValue(row.name, memory, `${row.key}-key`));
             if (row.value.address !== undefined) {
+                // One muted line: the type and address labels are read but not shown.
                 const metadata = element("span", "rs-codelens-memory__variable-metadata");
-                metadata.append(
-                    element("span", null, t("cl_address", row.value.address)),
-                    element("span", null, t("cl_type", row.value.type)),
-                );
+                for (const [labelKey, text] of [["cl_type_label", row.value.type], ["cl_address_label", row.value.address]]) {
+                    const item = element("span");
+                    item.append(element("span", "rs-codelens-prototype__sr-only", t(labelKey)), ` ${text}`);
+                    metadata.append(item);
+                }
                 label.append(metadata);
             }
             const cell = element("td");
@@ -281,14 +283,17 @@ export function createMemoryView({ hasHeap = true } = {}) {
 
     function card(title, key, id, changedKeys) {
         const node = element("section", "rs-codelens-memory__card");
+        // Status badges share the heading row; the heading alone names the card.
+        const header = element("div", "rs-codelens-memory__card-header");
         const titleNode = element("h5", null, title);
         titleNode.id = id;
         titleNode.tabIndex = -1;
         titleNode.dataset.memoryFocus = key;
         node.setAttribute("aria-labelledby", id);
-        node.append(titleNode);
-        if (changedKeys.has(key)) node.append(element("p", "rs-codelens-memory__changed", t("cl_changed")));
-        return { node, titleNode };
+        header.append(titleNode);
+        node.append(header);
+        if (changedKeys.has(key)) header.append(element("span", "rs-codelens-memory__changed", t("cl_changed")));
+        return { node, header, titleNode };
     }
 
     function scopeLink(id, key) {
@@ -339,22 +344,22 @@ export function createMemoryView({ hasHeap = true } = {}) {
         for (const frame of memory.frames) {
             const item = card(frame.label, frame.key, `${prefix}-frame-${encodeURIComponent(frame.id)}`, changedKeys);
             frameTargets.set(frame.id, item.titleNode);
-            frameCards.set(frame.id, item.node);
+            frameCards.set(frame.id, item);
         }
         const globals = card(t("cl_globals"), memoryKey("global"), `${prefix}-globals`, changedKeys).node;
         globals.append(table(memory.globals, memory, t("cl_name"), t("cl_no_globals"), changedKeys));
         stack.append(globals);
         for (const frame of memory.frames) {
-            const node = frameCards.get(frame.id);
+            const { node, header } = frameCards.get(frame.id);
             if (frame.active) {
                 node.classList.add("rs-codelens-memory__card--active");
-                node.append(element("p", "rs-codelens-memory__frame-status", t("cl_active")));
+                header.append(element("span", "rs-codelens-memory__badge rs-codelens-memory__frame-status", t("cl_active")));
             }
-            if (frame.retained) node.append(element("p", null, t("cl_retained")));
+            if (frame.retained) header.append(element("span", "rs-codelens-memory__badge", t("cl_retained")));
             for (const parent of frame.parents) {
-                const line = element("p");
-                line.append(scopeLink(parent, memoryKey("frame", frame.id, "parent", parent)));
-                node.append(line);
+                const badge = element("span", "rs-codelens-memory__badge");
+                badge.append(scopeLink(parent, memoryKey("frame", frame.id, "parent", parent)));
+                header.append(badge);
             }
             node.append(table(frame.bindings, memory, t("cl_name"), t("cl_no_locals"), changedKeys));
             stack.append(node);

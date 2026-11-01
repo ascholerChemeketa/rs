@@ -109,12 +109,12 @@ describe("CodeLens trace viewer prototype", () => {
         );
         const frame = [...container.querySelectorAll("h5")].find((node) => node.textContent.includes("SieveOfEratosthenes — frame 1"));
         expect(frame).toBeTruthy();
-        expect(frame.parentElement.textContent).toContain("Active frame");
-        const prime = [...frame.parentElement.querySelectorAll("a")].find((node) => node.textContent === "Reference to List 3");
+        expect(frame.closest(".rs-codelens-memory__card").textContent).toContain("Active frame");
+        const prime = [...frame.closest(".rs-codelens-memory__card").querySelectorAll("a")].find((node) => node.textContent === "Reference to List 3");
         const target = document.getElementById(prime.hash.slice(1));
         expect(target.textContent).toBe("List 3");
-        expect(target.parentElement.querySelectorAll("tbody tr")).toHaveLength(21);
-        expect(target.parentElement.textContent).toContain("False");
+        expect(target.closest(".rs-codelens-memory__card").querySelectorAll("tbody tr")).toHaveLength(21);
+        expect(target.closest(".rs-codelens-memory__card").textContent).toContain("False");
     });
 
     it("keeps two viewers independent and never treats trace text as HTML", () => {
@@ -168,9 +168,9 @@ describe("CodeLens trace viewer prototype", () => {
         expect(links).toHaveLength(4); // global node, two locals, and self-reference
         expect(new Set(links.map((link) => link.href)).size).toBe(1);
         const target = document.getElementById(links[0].hash.slice(1));
-        expect(target.parentElement.querySelectorAll("tbody tr")).toHaveLength(2);
+        expect(target.closest(".rs-codelens-memory__card").querySelectorAll("tbody tr")).toHaveLength(2);
         links[0].focus();
-        expect(target.parentElement.classList.contains("rs-codelens-memory__card--referenced")).toBe(true);
+        expect(target.closest(".rs-codelens-memory__card").classList.contains("rs-codelens-memory__card--referenced")).toBe(true);
         links[0].click();
         expect(document.activeElement).toBe(target);
     });
@@ -207,7 +207,7 @@ describe("CodeLens trace viewer prototype", () => {
         expect(document.activeElement).toBe(previous);
         expect(container.querySelector('input[value="text"]').checked).toBe(true);
         const list = [...container.querySelectorAll("h5")].find((node) => node.textContent === "List 2");
-        expect(list.parentElement.querySelectorAll("tbody tr")).toHaveLength(2);
+        expect(list.closest(".rs-codelens-memory__card").querySelectorAll("tbody tr")).toHaveLength(2);
         expect(container.querySelector('[role="status"]').textContent).toContain(
             "List 2, index 2 removed (was 3).",
         );
@@ -279,8 +279,8 @@ describe("CodeLens trace viewer prototype", () => {
         const viewer = mountTraceViewer(container, { code: "visit()", trace: [snapshot, snapshot] });
         const frames = [...container.querySelectorAll("h5")].filter((heading) => heading.textContent.includes("visit — frame"));
         expect(frames.map((heading) => heading.textContent)).toEqual(["visit — frame 1", "visit — frame 2"]);
-        expect(frames[0].parentElement.textContent).toContain("Retained frame (returned)");
-        expect(frames[1].parentElement.textContent).toContain("Active frame");
+        expect(frames[0].closest(".rs-codelens-memory__card").textContent).toContain("Retained frame (returned)");
+        expect(frames[1].closest(".rs-codelens-memory__card").textContent).toContain("Active frame");
         const links = [...container.querySelectorAll("a")].filter((link) => link.textContent === "Enclosing frame 1");
         expect(links).toHaveLength(2);
         expect(links.map((link) => link.hash.slice(1))).toEqual([frames[0].id, frames[0].id]);
