@@ -52,7 +52,6 @@
     margin-top: 0;
 }
 
-.rs-codelens-prototype__code,
 .rs-codelens-prototype__output {
     max-width: 100%;
     overflow: auto;
@@ -63,28 +62,125 @@
     white-space: pre;
 }
 
-.rs-codelens-prototype__line {
-    display: block;
-    min-width: max-content;
+.rs-codelens-prototype__code-panel {
+    container-type: inline-size;
 }
 
-.rs-codelens-prototype__line--current {
-    outline: 2px solid currentColor;
-    outline-offset: -2px;
-    background: var(--codeHighlightBg, transparent);
+/* CodeMirror 6 display. Token and marker colors are mixed toward the text
+   color, so they keep their contrast in light and dark themes. */
+.rs-codelens-prototype__code {
+    --cl-code-ink: var(--bodyFont, CanvasText);
+    --cl-code-bg: var(--codeBlockBg, var(--background, Canvas));
+    --cl-code-current: color-mix(in srgb, #f59e0b 28%, var(--cl-code-bg));
+    --cl-code-arrow: color-mix(in srgb, #2563eb 75%, var(--cl-code-ink));
+    --cl-code-breakpoint: color-mix(in srgb, #dc2626 85%, var(--cl-code-ink));
+    overflow: hidden;
+    border: 1px solid var(--componentBorderColor, currentColor);
+    border-radius: 0.25rem;
+    background: var(--cl-code-bg);
+    color: var(--cl-code-ink);
 }
 
-.rs-codelens-prototype__line-number {
-    display: inline-block;
-    min-width: 2.5em;
-    margin-right: 0.8em;
-    border-right: 1px solid currentColor;
-    text-align: right;
-    padding-right: 0.5em;
+.rs-codelens-prototype__code .cm-editor {
+    background: var(--cl-code-bg);
+    color: var(--cl-code-ink);
+}
+
+.rs-codelens-prototype__code .cm-editor .cm-scroller {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.5;
+}
+
+.rs-codelens-prototype__code .cm-editor .cm-gutters {
+    border-inline-end: 1px solid color-mix(in srgb, var(--cl-code-ink) 20%, var(--cl-code-bg));
+    background: color-mix(in srgb, var(--cl-code-ink) 5%, var(--cl-code-bg));
+    color: color-mix(in srgb, var(--cl-code-ink) 70%, var(--cl-code-bg));
+}
+
+.rs-codelens-prototype__code .cm-lineNumbers .cm-gutterElement,
+.rs-codelens-code__breakpoints .cm-gutterElement {
+    cursor: pointer;
     user-select: none;
 }
 
-.rs-codelens-prototype__current-label,
+.rs-codelens-prototype__code .cm-line.rs-codelens-code__line--current {
+    background: var(--cl-code-current);
+}
+
+.rs-codelens-code__marker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.15em;
+    width: 1.6em;
+    height: 100%;
+    padding-inline-start: 0.2em;
+}
+
+/* Breakpoint dot on the left, execution arrow on the right. */
+.rs-codelens-code__marker::before {
+    content: "";
+    box-sizing: border-box;
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+}
+
+.rs-codelens-code__marker::after {
+    content: "";
+    border-block: 0.35em solid transparent;
+    border-inline-start: 0.55em solid transparent;
+}
+
+.cm-gutterElement:hover > .rs-codelens-code__marker[data-kinds~="breakable"]::before {
+    border: 1px solid var(--cl-code-breakpoint);
+}
+
+.rs-codelens-code__marker[data-kinds~="breakpoint"]::before {
+    background: var(--cl-code-breakpoint);
+}
+
+.rs-codelens-code__marker[data-kinds~="current"]::after {
+    border-inline-start-color: var(--cl-code-arrow);
+}
+
+.rs-codelens-code__marker[data-kinds~="previous"]::after {
+    border-inline-start-color: color-mix(in srgb, var(--cl-code-arrow) 40%, var(--cl-code-bg));
+}
+
+.rs-codelens-prototype__code .tok-keyword,
+.rs-codelens-prototype__code .tok-operatorKeyword,
+.rs-codelens-prototype__code .tok-controlKeyword {
+    color: color-mix(in srgb, #9333ea 75%, var(--cl-code-ink));
+}
+
+.rs-codelens-prototype__code .tok-string,
+.rs-codelens-prototype__code .tok-string2 {
+    color: color-mix(in srgb, #15803d 75%, var(--cl-code-ink));
+}
+
+.rs-codelens-prototype__code :is(.tok-number, .tok-bool, .tok-atom, .tok-literal) {
+    color: color-mix(in srgb, #c2410c 75%, var(--cl-code-ink));
+}
+
+.rs-codelens-prototype__code :is(.tok-typeName, .tok-className, .tok-namespace) {
+    color: color-mix(in srgb, #0e7490 75%, var(--cl-code-ink));
+}
+
+.rs-codelens-prototype__code :is(.tok-definition, .tok-meta) {
+    color: color-mix(in srgb, #1d4ed8 75%, var(--cl-code-ink));
+}
+
+.rs-codelens-prototype__code .tok-comment {
+    color: color-mix(in srgb, var(--cl-code-ink) 68%, var(--cl-code-bg));
+    font-style: italic;
+}
+
+.rs-codelens-prototype__code-help {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.85em;
+}
+
 .rs-codelens-prototype__sr-only {
     position: absolute;
     width: 1px;
@@ -119,6 +215,41 @@
 
 .rs-codelens-prototype button[aria-disabled="true"] {
     cursor: default;
+    opacity: 0.55;
+}
+
+.rs-codelens-prototype__controls .rs-codelens-prototype__step-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0.3em 0.6em;
+}
+
+.rs-codelens-prototype__step-button svg {
+    flex: none;
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+/* Icons only where six labeled buttons would wrap; names remain for AT. */
+@container (max-width: 36rem) {
+    .rs-codelens-prototype__step-button .rs-codelens-prototype__button-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .rs-codelens-prototype__controls .rs-codelens-prototype__step-button {
+        min-width: 2.5em;
+        padding-inline: 0.5em;
+    }
 }
 
 .rs-codelens-prototype__memory {

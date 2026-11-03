@@ -40,12 +40,12 @@ describe("CodeLens trace viewer prototype", () => {
         const viewer = mountTraceViewer(container, hello);
         const next = container.querySelector("button[data-codelens-action=fwd]");
 
-        expect(next.textContent).toBe("Next step");
+        expect(next.textContent).toBe("Next line");
         expect(next.getAttribute("aria-disabled")).toBe("false");
         expect(viewer.currentStep).toBe(0);
-        expect(container.querySelector('[data-line="1"]')).toHaveProperty(
+        expect(container.querySelector(".cm-line.rs-codelens-code__line--current")).toHaveProperty(
             "textContent",
-            expect.stringContaining("Current line"),
+            expect.stringContaining("Line 1: Current line"),
         );
         expect(container.querySelector('[role="status"]').textContent).toContain(
             "Step 1 of 2. Line 1.",
@@ -130,8 +130,8 @@ describe("CodeLens trace viewer prototype", () => {
         const one = mountTraceViewer(first, modified);
         const two = mountTraceViewer(second, hello);
 
-        expect(document.querySelectorAll("img, b")).toHaveLength(0);
-        expect(first.querySelector(".rs-codelens-prototype__source").textContent).toContain(
+        expect(document.querySelectorAll("img:not(.cm-widgetBuffer), b")).toHaveLength(0);
+        expect(first.querySelector(".cm-content").textContent).toContain(
             "<img",
         );
         first.querySelector("button[data-codelens-action=fwd]").click();
@@ -196,7 +196,7 @@ describe("CodeLens trace viewer prototype", () => {
         const container = document.getElementById("viewer");
         const viewer = mountTraceViewer(container, graph);
         const previous = container.querySelector('button[data-codelens-action="back"]');
-        expect(previous.textContent).toBe("Previous step");
+        expect(previous.textContent).toBe("Previous line");
         expect(previous.getAttribute("aria-disabled")).toBe("false");
         container.querySelector('input[value="text"]').click();
         viewer.stepForward();
@@ -262,7 +262,7 @@ describe("CodeLens trace viewer prototype", () => {
         expect(container.textContent).toContain("Reference to object 99 (not present in this snapshot)");
         expect(container.querySelectorAll("a")).toHaveLength(1);
         expect(container.querySelector(".rs-codelens-memory__raw").textContent).toContain("<img");
-        expect(container.querySelectorAll("img")).toHaveLength(0);
+        expect(container.querySelectorAll("img:not(.cm-widgetBuffer)")).toHaveLength(0);
     });
 
     it("preserves distinct recursive frames and links enclosing scopes to the right frame", () => {

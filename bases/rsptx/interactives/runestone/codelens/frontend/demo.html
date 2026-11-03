@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>CodeLens trace viewer prototype</title>
-        <link rel="stylesheet" href="./trace-viewer.css?v=2" />
+        <link rel="stylesheet" href="./trace-viewer.css?v=3" />
         <style>
             html { color-scheme: light; }
             html[data-theme="dark"] { color-scheme: dark; --codelens-memory-tint: 10%; }
@@ -40,10 +40,26 @@
                 "./elk-layout.js": "./elk-layout.js?v=4",
                 "./memory-view.js": "./memory-view.js?v=9",
                 "./memory-model.js": "./memory-model.js?v=5",
-                "./frontend-i18n.en.js": "./frontend-i18n.en.js?v=7",
-                "./graphical-heap.js": "./graphical-heap.js?v=5"
+                "./frontend-i18n.en.js": "./frontend-i18n.en.js?v=8",
+                "./graphical-heap.js": "./graphical-heap.js?v=5",
+                "./code-panel.js": "./code-panel.js?v=1",
+                "@codemirror/state": "/node_modules/@codemirror/state/dist/index.js",
+                "@codemirror/view": "/node_modules/@codemirror/view/dist/index.js",
+                "@codemirror/language": "/node_modules/@codemirror/language/dist/index.js",
+                "@codemirror/streamparser": "/node_modules/@codemirror/streamparser/dist/index.js",
+                "@lezer/common": "/node_modules/@lezer/common/dist/index.js",
+                "@lezer/highlight": "/node_modules/@lezer/highlight/dist/index.js",
+                "@lezer/lr": "/node_modules/@lezer/lr/dist/index.js",
+                "@lezer/python": "/node_modules/@lezer/python/dist/index.js",
+                "@lezer/java": "/node_modules/@lezer/java/dist/index.js",
+                "@lezer/cpp": "/node_modules/@lezer/cpp/dist/index.js",
+                "@marijn/find-cluster-break": "/node_modules/@marijn/find-cluster-break/src/index.js",
+                "style-mod": "/node_modules/style-mod/src/style-mod.js",
+                "crelt": "/node_modules/crelt/index.js",
+                "w3c-keyname": "/node_modules/w3c-keyname/index.js"
             }}
         </script>
-        <script type="module" src="./demo.js?v=3"></script>
+        <!-- Serve from bases/rsptx/interactives so the import map reaches node_modules. -->
+        <script type="module" src="./demo.js?v=4"></script>
     </body>
 </html>

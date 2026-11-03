@@ -4,9 +4,63 @@ import { t } from "../../common/js/rsi18n.js";
 import "./frontend-i18n.en.js";
 import { normalizeMemory, memoryChanges } from "./memory-model.js";
 import { createMemoryView } from "./memory-view.js";
+import { createCodePanel } from "./code-panel.js";
 
 const mountedViewers = new WeakMap();
 let nextViewerId = 0;
+const svgNamespace = "http://www.w3.org/2000/svg";
+const iconShapes = {
+    first: ["M3 3h2v10H3z", "M13 3 6 8l7 5z"],
+    prevbp: ["circle", "M15 3 9 8l6 5z"],
+    back: ["M11 3 4 8l7 5z"],
+    fwd: ["M5 3l7 5-7 5z"],
+    nextbp: ["M1 3l6 5-6 5z", "circle"],
+    last: ["M3 3l7 5-7 5z", "M11 3h2v10h-2z"],
+};
+
+function stepIcon(action) {
+    const icon = document.createElementNS(svgNamespace, "svg");
+    icon.setAttribute("viewBox", "0 0 16 16");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
+    for (const shape of iconShapes[action]) {
+        const node = document.createElementNS(svgNamespace, shape === "circle" ? "circle" : "path");
+        if (shape === "circle") {
+            // The breakpoint dot sits on the side the button moves toward.
+            node.setAttribute("cx", action === "prevbp" ? "4.5" : "11.5");
+            node.setAttribute("cy", "8");
+            node.setAttribute("r", "3");
+            node.setAttribute("class", "rs-codelens-prototype__icon-breakpoint");
+        } else {
+            node.setAttribute("d", shape);
+        }
+        icon.append(node);
+    }
+    return icon;
+}
+
+// Breakpoints persist per visualizer in this browser only. Storage can be
+// unavailable (private windows, blocked site data); the viewer works without it.
+function loadBreakpoints(key, breakableLines) {
+    if (!key) return new Set();
+    try {
+        const stored = JSON.parse(window.localStorage.getItem(`codelens-breakpoints:${key}`) ?? "[]");
+        return new Set(Array.isArray(stored) ? stored.filter((line) => breakableLines.has(line)) : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function saveBreakpoints(key, breakpoints) {
+    if (!key) return;
+    try {
+        const storageKey = `codelens-breakpoints:${key}`;
+        if (breakpoints.size === 0) window.localStorage.removeItem(storageKey);
+        else window.localStorage.setItem(storageKey, JSON.stringify([...breakpoints]));
+    } catch {
+        // Breakpoints still work for this page view.
+    }
+}
 
 function element(tag, className, textContent) {
     const node = document.createElement(tag);
@@ -67,39 +121,37 @@ export function mountTraceViewer(container, data, options = {}) {
     const codePanel = element("section", "rs-codelens-prototype__code-panel");
     codePanel.setAttribute("aria-label", t("cl_code"));
     const codeHeading = element("h3", null, t("cl_code"));
-    const codePre = element("pre", "rs-codelens-prototype__code");
-    const code = element("code");
-    codePre.append(code);
-    const sourceLines = data.code.replace(/\r\n?/g, "\n").split("\n");
-    if (sourceLines[sourceLines.length - 1] === "") sourceLines.pop();
-    const lineNodes = sourceLines.map((source, index) => {
-        const row = element("span", "rs-codelens-prototype__line");
-        row.dataset.line = String(index + 1);
-        row.append(
-            element(
-                "span", "rs-codelens-prototype__sr-only",
-                `${t("cl_line", index + 1)}: `,
-            ),
-            element("span", "rs-codelens-prototype__line-number", String(index + 1)),
-            element("span", "rs-codelens-prototype__current-label"),
-            element("span", "rs-codelens-prototype__source", source || " "),
-        );
-        row.querySelector(".rs-codelens-prototype__line-number").setAttribute(
-            "aria-hidden",
-            "true",
-        );
-        code.append(row);
-        return row;
+    const lineOf = (index) => data.trace[index]?.line;
+    const breakableLines = new Set(data.trace.map((entry) => entry.line).filter((line) => Number.isInteger(line) && line > 0));
+    const breakpoints = loadBreakpoints(options.breakpointKey, breakableLines);
+    const codeView = createCodePanel({
+        code: data.code,
+        lang: options.lang,
+        breakableLines,
+        onToggleBreakpoint: toggleBreakpoint,
     });
+    const codeHelp = element("p", "rs-codelens-prototype__code-help", t("cl_breakpoint_help"));
 
     const controls = element("div", "rs-codelens-prototype__controls");
-    const previous = element("button", null, t("cl_previous"));
-    previous.type = "button";
-    previous.dataset.codelensAction = "back";
-    const next = element("button", null, t("cl_next"));
-    next.type = "button";
-    next.dataset.codelensAction = "fwd";
-    controls.append(previous, next);
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", t("cl_step_controls"));
+    const buttons = {};
+    for (const [action, key] of [
+        ["first", "cl_start"],
+        ["prevbp", "cl_previous_breakpoint"],
+        ["back", "cl_previous"],
+        ["fwd", "cl_next"],
+        ["nextbp", "cl_next_breakpoint"],
+        ["last", "cl_end"],
+    ]) {
+        const button = element("button", "rs-codelens-prototype__step-button");
+        button.type = "button";
+        button.dataset.codelensAction = action;
+        button.title = t(key);
+        button.append(stepIcon(action), element("span", "rs-codelens-prototype__button-label", t(key)));
+        buttons[action] = button;
+        controls.append(button);
+    }
     const status = element("p", "rs-codelens-prototype__status");
     status.setAttribute("role", "status");
     status.setAttribute("aria-live", "polite");
@@ -114,7 +166,8 @@ export function mountTraceViewer(container, data, options = {}) {
 
     codePanel.append(
         codeHeading,
-        codePre,
+        codeView.element,
+        codeHelp,
         controls,
         status,
         outputHeading,
@@ -124,16 +177,49 @@ export function mountTraceViewer(container, data, options = {}) {
     root.append(viewerHeading, layoutControls, workspace);
     container.replaceChildren(root);
 
-    function render(previousStep = null) {
-        const entry = data.trace[step];
-        for (const [index, row] of lineNodes.entries()) {
-            const current = index + 1 === entry.line;
-            row.classList.toggle("rs-codelens-prototype__line--current", current);
-            row.querySelector(".rs-codelens-prototype__current-label").textContent =
-                current ? t("cl_current_line") : "";
+    // A breakpoint stops where execution arrives on its line, so a line that
+    // spans several consecutive steps (a call and its return) stops once.
+    function stopsAt(index) {
+        return breakpoints.has(lineOf(index)) && (index === 0 || lineOf(index - 1) !== lineOf(index));
+    }
+
+    function breakpointStep(direction) {
+        for (let index = step + direction; index >= 0 && index < data.trace.length; index += direction) {
+            if (stopsAt(index)) return index;
         }
-        previous.setAttribute("aria-disabled", String(step === 0));
-        next.setAttribute("aria-disabled", String(step === data.trace.length - 1));
+        return null;
+    }
+
+    function updateButtons() {
+        const last = data.trace.length - 1;
+        for (const [action, disabled] of [
+            ["first", step === 0],
+            ["back", step === 0],
+            ["fwd", step === last],
+            ["last", step === last],
+            ["prevbp", breakpointStep(-1) === null],
+            ["nextbp", breakpointStep(1) === null],
+        ]) {
+            buttons[action].setAttribute("aria-disabled", String(disabled));
+        }
+    }
+
+    function toggleBreakpoint(line) {
+        if (destroyed || !breakableLines.has(line)) return false;
+        const added = !breakpoints.has(line);
+        if (added) breakpoints.add(line);
+        else breakpoints.delete(line);
+        saveBreakpoints(options.breakpointKey, breakpoints);
+        codeView.setMarkers({ breakpoints });
+        updateButtons();
+        status.textContent = t(added ? "cl_breakpoint_set" : "cl_breakpoint_removed", line);
+        return true;
+    }
+
+    function render(previousStep = null, atBreakpoint = false) {
+        const entry = data.trace[step];
+        codeView.setMarkers({ current: entry.line, previous: step > 0 ? lineOf(step - 1) : null, breakpoints });
+        updateButtons();
 
         const memory = normalizeMemory(entry, options.lang);
         const changes = memoryChanges(previousMemory, memory);
@@ -142,7 +228,8 @@ export function mountTraceViewer(container, data, options = {}) {
 
         const stdout = typeof entry.stdout === "string" ? entry.stdout : "";
         output.textContent = stdout;
-        let announcement = t("cl_step", step + 1, data.trace.length, traceLine(entry));
+        let announcement = atBreakpoint ? `${t("cl_at_breakpoint")} ` : "";
+        announcement += t("cl_step", step + 1, data.trace.length, traceLine(entry));
         if (changes.length > 0) {
             announcement += ` ${changes.slice(0, 3).map((change) => change.text).join(" ")}`;
         }
@@ -163,21 +250,30 @@ export function mountTraceViewer(container, data, options = {}) {
         status.textContent = announcement;
     }
 
-    function moveStep(direction) {
-        const destination = step + direction;
-        if (destroyed || destination < 0 || destination >= data.trace.length) return false;
+    function goToStep(destination, atBreakpoint = false) {
+        if (destroyed || destination === null || destination === step ||
+            destination < 0 || destination >= data.trace.length) return false;
         const previousStep = step;
         step = destination;
-        render(previousStep);
+        render(previousStep, atBreakpoint);
         return true;
     }
 
-    const stepForward = () => moveStep(1);
-    const stepBackward = () => moveStep(-1);
+    const stepForward = () => goToStep(step + 1);
+    const stepBackward = () => goToStep(step - 1);
+    const actions = {
+        first: () => goToStep(0),
+        prevbp: () => goToStep(breakpointStep(-1), true),
+        back: stepBackward,
+        fwd: stepForward,
+        nextbp: () => goToStep(breakpointStep(1), true),
+        last: () => goToStep(data.trace.length - 1),
+    };
 
-    for (const [button, action] of [[previous, stepBackward], [next, stepForward]]) {
+    for (const [action, button] of Object.entries(buttons)) {
         button.addEventListener("click", (event) => {
-            if (!action()) {
+            if (!actions[action]()) {
+                // Unavailable moves are not logged as navigation.
                 event.preventDefault();
                 event.stopImmediatePropagation();
             }
@@ -189,10 +285,19 @@ export function mountTraceViewer(container, data, options = {}) {
         get currentStep() {
             return step;
         },
+        get breakpoints() {
+            return [...breakpoints].sort((a, b) => a - b);
+        },
         stepForward,
         stepBackward,
+        goToStart: actions.first,
+        goToEnd: actions.last,
+        nextBreakpoint: actions.nextbp,
+        previousBreakpoint: actions.prevbp,
+        toggleBreakpoint,
         destroy() {
             destroyed = true;
+            codeView.destroy();
             memoryView.destroy();
             root.remove();
             if (mountedViewers.get(container) === controller) {

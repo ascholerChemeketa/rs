@@ -25,9 +25,12 @@ function attachLoggers(codelens, divid) {
         ["jmpLastInstr", "last"],
         ["jmpStepBack", "back"],
         ["jmpStepFwd", "fwd"],
+        [null, "prevbp"],
+        [null, "nextbp"],
     ]) {
+        const selector = `[data-codelens-action="${action}"]`;
         root.querySelector(
-            `#${buttonId}, [data-codelens-action="${action}"]`,
+            buttonId ? `#${buttonId}, ${selector}` : selector,
         )?.addEventListener("click", () => {
             rb.logBookEvent({ event: "codelens", act: action, div_id: divid });
         });
@@ -59,6 +62,7 @@ function styleButtons(divid) {
 function renderVisualizer(data, divid, lang) {
     const options = {
         startingInstruction: data.startingInstruction || 0,
+        breakpointKey: divid,
         editCodeBaseURL: null,
         hideCode: false,
         lang: lang,

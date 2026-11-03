@@ -1,4 +1,4 @@
-import { mountTraceViewer } from "./trace-viewer.js?v=2";
+import { mountTraceViewer } from "./trace-viewer.js?v=3";
 
 const traceSelect = document.getElementById("trace");
 const themeToggle = document.getElementById("dark-theme");
@@ -19,7 +19,7 @@ async function loadTrace() {
         const trace = await response.json();
         if (request !== traceRequest) return;
         currentViewer?.destroy();
-        currentViewer = mountTraceViewer(viewer, trace, { lang: language });
+        currentViewer = mountTraceViewer(viewer, trace, { lang: language, breakpointKey: `demo-${selected.value}` });
         traceNote.hidden = language.startsWith("py");
     } catch (failure) {
         if (request !== traceRequest) return;
