@@ -41,6 +41,9 @@ export function normalizeValue(value, language = "py3") {
             if (target !== null) Object.assign(decoded, { kind: "pointer", id: target });
             return { ...decoded, address: String(value[1]), type: String(value[2]) };
         }
+        if (value[0] === "CPP_STRING") {
+            return { kind: "string", address: String(value[1]), type: "string", chars: value[2] };
+        }
         if (value[0] === "REF") return { kind: "reference", id: String(value[1]) };
         if (["SPECIAL_FLOAT", "IMPORTED_FAUX_PRIMITIVE"].includes(value[0])) {
             return literal(value[1]);
@@ -243,7 +246,88 @@ export function findInlineFunctions(trace, language = "py3") {
     return inline;
 }
 
-export function normalizeMemory(entry, language = "py3", code = "", inlineFunctions = new Map()) {
+// libstdc++ keeps a std::string's characters in a heap char buffer reached
+// through _M_dataplus._M_p. Returns that pointer's address, or null.
+function cppStringPointer(raw) {
+    if (!Array.isArray(raw) || raw[0] !== "C_STRUCT" ||
+        !/^(?:std::)?(?:string|basic_string<char\b.*)$/.test(String(raw[2]))) return null;
+    const field = (struct, name) => struct?.[0] === "C_STRUCT"
+        ? struct.slice(3).find((item) => Array.isArray(item) && item[0] === name)?.[1] : undefined;
+    const pointer = field(field(raw, "_M_dataplus"), "_M_p");
+    return pointer?.[0] === "C_DATA" && pointer[2] === "pointer" ? cAddress(pointer[3]) : null;
+}
+
+function forEachValue(entry, visit) {
+    const walk = (value) => {
+        if (!Array.isArray(value)) return;
+        visit(value);
+        for (const item of value) walk(item);
+    };
+    for (const value of Object.values(entry.globals ?? {})) walk(value);
+    for (const frame of entry.stack_to_render ?? []) {
+        for (const value of Object.values(frame.encoded_locals ?? {})) walk(value);
+    }
+    for (const value of Object.values(entry.heap ?? {})) walk(value);
+}
+
+export function hasCppStrings(trace) {
+    return trace.some((entry) => {
+        let found = false;
+        forEachValue(entry, (value) => { found ||= cppStringPointer(value) !== null; });
+        return found;
+    });
+}
+
+/**
+ * Replace each C++ string struct in a snapshot with its characters, read from
+ * the heap buffer it points to. Returns the rewritten snapshot and the ids of
+ * the heap arrays that only held string text.
+ */
+export function simplifyCppStrings(entry) {
+    const chars = new Map();
+    for (const [id, raw] of Object.entries(entry.heap ?? {})) {
+        if (raw[0] !== "C_ARRAY") continue;
+        for (const item of raw.slice(2)) {
+            const address = Array.isArray(item) && item[0] === "C_DATA" && item[2] === "char" && cAddress(item[1]);
+            if (address) chars.set(address, { id, text: item[3] });
+        }
+    }
+    const buffers = new Set();
+    const read = (address) => {
+        const text = [];
+        for (let next = BigInt(address); ; next++) {
+            const item = chars.get(`0x${next.toString(16)}`);
+            if (!item) return null;
+            if (item.text === "\\0") {
+                buffers.add(item.id);
+                return text;
+            }
+            if (item.text === "<UNINITIALIZED>") return null;
+            text.push(item.text);
+        }
+    };
+    const rewrite = (value) => {
+        if (!Array.isArray(value)) return value;
+        const pointer = cppStringPointer(value);
+        const text = pointer && read(pointer);
+        return text ? ["CPP_STRING", value[1], text] : value.map(rewrite);
+    };
+    const rewriteAll = (values) => values && Object.fromEntries(
+        Object.entries(values).map(([name, value]) => [name, rewrite(value)]));
+    const simplified = {
+        ...entry,
+        globals: rewriteAll(entry.globals),
+        stack_to_render: entry.stack_to_render?.map((frame) => ({
+            ...frame, encoded_locals: rewriteAll(frame.encoded_locals),
+        })),
+        heap: rewriteAll(entry.heap),
+    };
+    for (const id of buffers) delete simplified.heap[id];
+    return { entry: simplified, buffers };
+}
+
+export function normalizeMemory(entry, language = "py3", code = "", inlineFunctions = new Map(), { simpleStrings = false } = {}) {
+    if (simpleStrings) entry = simplifyCppStrings(entry).entry;
     const inlineValue = (raw) => raw?.[0] === "REF" && inlineFunctions.has(String(raw[1]))
         ? literal(t("cl_function_value", inlineFunctions.get(String(raw[1])))) : null;
     return {
@@ -286,6 +370,7 @@ export function normalizeMemory(entry, language = "py3", code = "", inlineFuncti
 }
 
 export function valueText(value, memory) {
+    if (value.kind === "string") return JSON.stringify(value.chars.join(""));
     if (value.kind === "struct" || value.kind === "array") {
         return t("cl_aggregate_value", value.type, value.address);
     }

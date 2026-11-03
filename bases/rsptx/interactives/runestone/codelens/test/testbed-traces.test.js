@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
 import { chooseView } from "./view-helpers.js";
-import { normalizeMemory } from "../frontend/memory-model.js";
+import { normalizeMemory, hasCppStrings } from "../frontend/memory-model.js";
 import javaHello from "../frontend/fixtures/java-hello-world.json";
 import javaSieve from "../frontend/fixtures/java-sieve.json";
 import javaCallstack from "../frontend/fixtures/java-callstack.json";
@@ -10,6 +10,7 @@ import cppSieve from "../frontend/fixtures/cpp-sieve.json";
 import cppPointers from "../frontend/fixtures/cpp-class-pointers.json";
 import cppPassingPointers from "../frontend/fixtures/cpp-passing-pointers.json";
 import cppReferencesFunctions from "../frontend/fixtures/cpp-references-functions.json";
+import cppString from "../frontend/fixtures/cpp-string.json";
 
 describe("Java and C++ testbed samples", () => {
     it("names Java frames by function and keeps them stable across steps", () => {
@@ -84,6 +85,7 @@ describe("Java and C++ testbed samples", () => {
         ["C++ classes and pointers", "cpp", cppPointers],
         ["C++ passing pointers", "cpp", cppPassingPointers],
         ["C++ references and functions", "cpp", cppReferencesFunctions],
+        ["C++ strings and a vector", "cpp", cppString],
     ])("steps through every snapshot in %s without modifying the trace", (_name, lang, data) => {
         document.body.innerHTML = '<div id="viewer"></div>';
         const root = document.getElementById("viewer");
@@ -129,11 +131,48 @@ describe("Java and C++ testbed samples", () => {
         ["C++ classes and pointers", "cpp", cppPointers],
         ["C++ passing pointers", "cpp", cppPassingPointers],
         ["C++ references and functions", "cpp", cppReferencesFunctions],
+        ["C++ strings and a vector", "cpp", cppString],
     ])("shows no void or unsupported values in %s",(_name, lang, data) => {
         for (const entry of data.trace) {
             const memory = normalizeMemory(entry, lang, data.code);
             const text = JSON.stringify([memory.globals, memory.frames, [...memory.objects.values()]]);
             expect(text).not.toMatch(/VOID|Unsupported/);
         }
+    });
+
+    it("shows C++ strings as indexed text by default and as stored after switching", () => {
+        document.body.innerHTML = '<div id="viewer"></div>';
+        const root = document.getElementById("viewer");
+        expect(hasCppStrings(cppString.trace)).toBe(true);
+        expect(hasCppStrings(cppPointers.trace)).toBe(false);
+        const viewer = mountTraceViewer(root, cppString, { lang: "cpp", startingInstruction: 3 });
+        const toggle = root.querySelector(".rs-codelens-memory__string-control input");
+        expect(toggle.getAttribute("role")).toBe("switch");
+        expect(toggle.checked).toBe(true);
+        expect(root.querySelector(`label[for="${toggle.id}"]`).textContent).toBe("Show C++ strings as text");
+        // The string's buffer was the only heap object, so the heap column is gone.
+        expect(root.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(true);
+        const chars = root.querySelector(".rs-codelens-memory__chars");
+        expect(chars.closest(".rs-codelens-memory__string").firstChild.textContent).toBe('"Hello, World!"');
+        expect(chars.getAttribute("aria-label")).toBe("s characters");
+        const [indexes, letters] = chars.querySelectorAll("tr");
+        expect([...indexes.querySelectorAll("th")].map((cell) => cell.textContent).slice(0, 4)).toEqual(["Index", "0", "1", "2"]);
+        expect([...letters.querySelectorAll("td")].map((cell) => cell.textContent).join("")).toBe("Hello,␣spaceWorld!");
+
+        toggle.click();
+        expect(root.querySelector(".rs-codelens-memory__chars")).toBeNull();
+        expect(root.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(false);
+        expect(root.querySelectorAll("[data-heap-id]")).toHaveLength(1);
+        expect(root.textContent).toContain("_M_dataplus");
+        viewer.stepForward();
+        expect(root.querySelector(".rs-codelens-memory__chars")).toBeNull();
+        viewer.destroy();
+    });
+
+    it("offers no string switch for C++ programs without strings", () => {
+        document.body.innerHTML = '<div id="viewer"></div>';
+        const root = document.getElementById("viewer");
+        mountTraceViewer(root, cppPointers, { lang: "cpp" });
+        expect(root.querySelector(".rs-codelens-memory__string-control")).toBeNull();
     });
 });

@@ -2,7 +2,9 @@
 // The trace format is produced elsewhere; this module never executes code.
 import { t } from "../../common/js/rsi18n.js";
 import "./frontend-i18n.en.js";
-import { normalizeMemory, memoryChanges, findInlineFunctions } from "./memory-model.js";
+import {
+    normalizeMemory, memoryChanges, findInlineFunctions, hasCppStrings, simplifyCppStrings,
+} from "./memory-model.js";
 import { createMemoryView } from "./memory-view.js";
 import { createCodePanel } from "./code-panel.js";
 
@@ -158,9 +160,25 @@ export function mountTraceViewer(container, data, options = {}) {
     status.setAttribute("aria-atomic", "true");
 
     const inlineFunctions = findInlineFunctions(data.trace, options.lang);
-    const hasHeap = data.trace.some((entry) =>
-        Object.keys(entry.heap ?? {}).some((id) => !inlineFunctions.has(id)));
-    const memoryView = createMemoryView({ hasHeap });
+    // C++ strings read as text by default; a switch shows how they are stored.
+    const hasStrings = options.lang === "cpp" && hasCppStrings(data.trace);
+    let simpleStrings = hasStrings;
+    const heapUsed = () => data.trace.some((entry) => {
+        const buffers = simpleStrings ? simplifyCppStrings(entry).buffers : new Set();
+        return Object.keys(entry.heap ?? {}).some((id) => !inlineFunctions.has(id) && !buffers.has(id));
+    });
+    const memoryView = createMemoryView({
+        hasHeap: heapUsed(),
+        stringSwitch: hasStrings ? {
+            checked: simpleStrings,
+            onChange(checked) {
+                simpleStrings = checked;
+                memoryView.setHasHeap(heapUsed());
+                previousMemory = currentMemory();
+                memoryView.update(previousMemory, []);
+            },
+        } : null,
+    });
     let previousMemory = null;
     const outputHeading = element("h3", null, t("cl_output"));
     const output = element("pre", "rs-codelens-prototype__output");
@@ -213,12 +231,16 @@ export function mountTraceViewer(container, data, options = {}) {
         return true;
     }
 
+    function currentMemory() {
+        return normalizeMemory(data.trace[step], options.lang, data.code, inlineFunctions, { simpleStrings });
+    }
+
     function render(previousStep = null, atBreakpoint = false) {
         const entry = data.trace[step];
         codeView.setMarkers({ current: entry.line, previous: step > 0 ? lineOf(step - 1) : null, breakpoints });
         updateButtons();
 
-        const memory = normalizeMemory(entry, options.lang, data.code, inlineFunctions);
+        const memory = currentMemory();
         const changes = memoryChanges(previousMemory, memory);
         memoryView.update(memory, changes);
         previousMemory = memory;

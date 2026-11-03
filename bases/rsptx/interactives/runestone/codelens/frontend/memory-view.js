@@ -41,7 +41,11 @@ function saveViewMode(mode) {
 }
 
 /** Three layouts of one semantic tree. Only the connector overlay is aria-hidden. */
-export function createMemoryView({ hasHeap = true } = {}) {
+/**
+ * `stringSwitch`, when given, adds a switch below the memory view for C++
+ * strings: `{ checked, onChange(checked) }`.
+ */
+export function createMemoryView({ hasHeap = true, stringSwitch = null } = {}) {
     const prefix = `rs-cl-memory-${++nextViewId}`;
     const root = element("section", "rs-codelens-memory");
     const heading = element("h3", null, t("cl_memory"));
@@ -84,6 +88,19 @@ export function createMemoryView({ hasHeap = true } = {}) {
     stage.append(overlay, stack, heap);
     viewport.append(stage);
     root.append(heading, viewControls, viewport, graphical.element, changeDetails);
+    if (stringSwitch) {
+        const control = element("div", "rs-codelens-memory__string-control");
+        const input = element("input");
+        input.type = "checkbox";
+        input.setAttribute("role", "switch");
+        input.id = `${prefix}-strings`;
+        input.checked = stringSwitch.checked;
+        input.addEventListener("change", () => stringSwitch.onChange(input.checked));
+        const label = element("label", null, t("cl_strings_as_text"));
+        label.htmlFor = input.id;
+        control.append(input, label);
+        root.append(control);
+    }
 
     function setView(mode) {
         stage.dataset.view = mode;
@@ -236,7 +253,45 @@ export function createMemoryView({ hasHeap = true } = {}) {
         return link;
     }
 
+    // A string reads as its text, then one row of indexes over its characters.
+    function stringValue(value, context) {
+        const node = element("div", "rs-codelens-memory__string");
+        node.append(element("span", null, valueText(value)));
+        if (value.chars.length === 0) return node;
+        const chars = element("table", "rs-codelens-memory__chars");
+        chars.setAttribute("aria-label", t("cl_string_chars", context));
+        const indexes = element("tr");
+        const letters = element("tr");
+        for (const [row, text] of [[indexes, t("cl_index")], [letters, t("cl_char")]]) {
+            const heading = element("th", null, text);
+            heading.scope = "row";
+            row.append(heading);
+        }
+        value.chars.forEach((char, index) => {
+            const heading = element("th", null, String(index));
+            heading.scope = "col";
+            indexes.append(heading);
+            const cell = element("td");
+            if (char === " ") {
+                const mark = element("span", null, "\u2423");
+                mark.setAttribute("aria-hidden", "true");
+                cell.append(mark, element("span", "rs-codelens-prototype__sr-only", t("cl_space")));
+            } else {
+                cell.textContent = char;
+            }
+            letters.append(cell);
+        });
+        const body = element("tbody");
+        body.append(indexes, letters);
+        chars.append(body);
+        const scroller = element("div", "rs-codelens-memory__chars-scroll");
+        scroller.append(chars);
+        node.append(scroller);
+        return node;
+    }
+
     function renderValue(value, memory, key, changedKeys = new Set(), context = "") {
+        if (value.kind === "string") return stringValue(value, context);
         if (value.kind === "struct" || value.kind === "array") {
             return table(aggregateRows(value, key), memory,
                 t(value.kind === "array" ? "cl_index" : "cl_field"), t("cl_empty"), changedKeys,
@@ -473,6 +528,10 @@ export function createMemoryView({ hasHeap = true } = {}) {
     return {
         element: root,
         update,
+        setHasHeap(value) {
+            hasHeap = value;
+            showHeap();
+        },
         destroy() {
             destroyed = true;
             graphical.destroy();
