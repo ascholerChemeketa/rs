@@ -19,6 +19,27 @@ function svgElement(tag, attributes) {
     return node;
 }
 
+// One memory view preference applies to every CodeLens on every page.
+const viewStorageKey = "codelens-memory-view";
+const viewModes = ["diagram", "graphical", "text"];
+
+function loadViewMode() {
+    try {
+        const stored = window.localStorage.getItem(viewStorageKey);
+        return viewModes.includes(stored) ? stored : "diagram";
+    } catch {
+        return "diagram";
+    }
+}
+
+function saveViewMode(mode) {
+    try {
+        window.localStorage.setItem(viewStorageKey, mode);
+    } catch {
+        // Storage can be unavailable; the choice still applies to this view.
+    }
+}
+
 /** Three layouts of one semantic tree. Only the connector overlay is aria-hidden. */
 export function createMemoryView({ hasHeap = true } = {}) {
     const prefix = `rs-cl-memory-${++nextViewId}`;
@@ -31,30 +52,18 @@ export function createMemoryView({ hasHeap = true } = {}) {
     viewControls.append(element("legend", null, t("cl_memory_view")));
     const stage = element("div", "rs-codelens-memory__stage");
     const viewport = element("div", "rs-codelens-memory__viewport");
-    viewport.dataset.view = "diagram";
-    stage.dataset.view = "diagram";
-    stage.dataset.hasHeap = String(hasHeap);
-    for (const mode of ["diagram", "graphical", "text"]) {
+    const initialView = loadViewMode();
+    for (const mode of viewModes) {
         const label = element("label");
         const radio = element("input");
         radio.type = "radio";
         radio.name = `${prefix}-view`;
         radio.value = mode;
-        radio.checked = mode === "diagram";
+        radio.checked = mode === initialView;
         radio.addEventListener("change", () => {
             if (radio.checked) {
-                stage.dataset.view = mode;
-                viewport.dataset.view = mode;
-                viewport.tabIndex = mode === "graphical" ? 0 : -1;
-                if (mode === "graphical") {
-                    viewport.setAttribute("role", "region");
-                    viewport.setAttribute("aria-label", t("cl_graph_viewport"));
-                } else {
-                    viewport.removeAttribute("role");
-                    viewport.removeAttribute("aria-label");
-                }
-                graphical.setEnabled(mode === "graphical" && hasHeap);
-                scheduleDraw();
+                saveViewMode(mode);
+                setView(mode);
             }
         });
         label.append(radio, document.createTextNode(` ${t(`cl_${mode}`)}`));
@@ -68,7 +77,6 @@ export function createMemoryView({ hasHeap = true } = {}) {
     });
     const stack = element("section", "rs-codelens-memory__column rs-codelens-memory__column--stack");
     const heap = element("section", "rs-codelens-memory__column rs-codelens-memory__column--heap");
-    heap.hidden = !hasHeap;
     const heapCanvas = element("div", "rs-codelens-memory__heap-canvas");
     const graphical = createGraphicalHeap({ canvas: heapCanvas, prefix, onChange: scheduleDraw });
     const changeDetails = element("details", "rs-codelens-memory__changes");
@@ -78,7 +86,32 @@ export function createMemoryView({ hasHeap = true } = {}) {
     changeDetails.hidden = true;
     stage.append(overlay, stack, heap);
     viewport.append(stage);
-    root.append(heading, viewControls, help, graphical.element, viewport, changeDetails);
+    root.append(heading, viewControls, help, viewport, graphical.element, changeDetails);
+
+    function setView(mode) {
+        stage.dataset.view = mode;
+        viewport.dataset.view = mode;
+        viewport.tabIndex = mode === "graphical" ? 0 : -1;
+        if (mode === "graphical") {
+            viewport.setAttribute("role", "region");
+            viewport.setAttribute("aria-label", t("cl_graph_viewport"));
+        } else {
+            viewport.removeAttribute("role");
+            viewport.removeAttribute("aria-label");
+        }
+        if ((mode === "graphical") !== graphical.enabled) graphical.setEnabled(mode === "graphical");
+        showHeap();
+        scheduleDraw();
+    }
+
+    // A trace that never uses the heap gets no heap column or arranging tools,
+    // so the layout stays the same at every step.
+    function showHeap() {
+        heap.hidden = !hasHeap;
+        stage.dataset.hasHeap = String(hasHeap);
+        root.dataset.hasHeap = String(hasHeap);
+        graphical.element.hidden = !(stage.dataset.view === "graphical" && hasHeap);
+    }
 
     let references = [];
     let targets = new Map();
@@ -439,6 +472,7 @@ export function createMemoryView({ hasHeap = true } = {}) {
     const resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(scheduleDraw) : null;
     resizeObserver?.observe(stage);
     window.addEventListener("resize", scheduleDraw);
+    setView(initialView);
     return {
         element: root,
         update,

@@ -33,13 +33,23 @@
     min-width: 0;
 }
 
+/* Code keeps a readable minimum width beside memory. When the step has no
+   heap, memory needs only the stack column and code takes the rest. */
 .rs-codelens-prototype[data-layout="side-by-side"] .rs-codelens-prototype__workspace {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-columns: minmax(min(24rem, 100%), 2fr) minmax(0, 3fr);
+}
+
+.rs-codelens-prototype[data-layout="side-by-side"] .rs-codelens-prototype__workspace:has(.rs-codelens-memory[data-has-heap="false"]) {
+    grid-template-columns: minmax(min(24rem, 100%), 1fr) minmax(min-content, 18rem);
 }
 
 @container (min-width: 64rem) {
     .rs-codelens-prototype[data-layout="auto"] .rs-codelens-prototype__workspace {
-        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+        grid-template-columns: minmax(min(24rem, 100%), 2fr) minmax(0, 3fr);
+    }
+
+    .rs-codelens-prototype[data-layout="auto"] .rs-codelens-prototype__workspace:has(.rs-codelens-memory[data-has-heap="false"]) {
+        grid-template-columns: minmax(min(24rem, 100%), 1fr) minmax(min-content, 18rem);
     }
 }
 
@@ -88,6 +98,7 @@
 
 .rs-codelens-prototype__code .cm-editor .cm-scroller {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.875em;
     line-height: 1.5;
 }
 
@@ -684,6 +695,14 @@
 
 .rs-codelens-memory__graph-controls {
     margin: 0.75rem 0;
+}
+
+.rs-codelens-memory__graph-controls > p:empty {
+    display: none;
+}
+
+.rs-codelens-memory__graph-tools > summary {
+    cursor: pointer;
 }
 
 .rs-codelens-memory__movement {

@@ -4,11 +4,11 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>CodeLens trace viewer prototype</title>
-        <link rel="stylesheet" href="./trace-viewer.css?v=5" />
+        <link rel="stylesheet" href="./trace-viewer.css?v=8" />
         <style>
             html { color-scheme: light; }
             html[data-theme="dark"] { color-scheme: dark; --codelens-memory-tint: 10%; }
-            body { max-width: 70rem; margin: 1rem auto; padding: 0 1rem; font: 1rem/1.5 system-ui, sans-serif; }
+            body { max-width: 800px; margin: 1rem auto; padding: 0 1rem; font: 1rem/1.5 system-ui, sans-serif; }
             .demo-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1rem; }
         </style>
     </head>
@@ -39,10 +39,10 @@
         <script type="importmap">
             {"imports": {
                 "./elk-layout.js": "./elk-layout.js?v=4",
-                "./memory-view.js": "./memory-view.js?v=9",
-                "./memory-model.js": "./memory-model.js?v=7",
-                "./frontend-i18n.en.js": "./frontend-i18n.en.js?v=9",
-                "./graphical-heap.js": "./graphical-heap.js?v=5",
+                "./memory-view.js": "./memory-view.js?v=12",
+                "./memory-model.js": "./memory-model.js?v=8",
+                "./frontend-i18n.en.js": "./frontend-i18n.en.js?v=11",
+                "./graphical-heap.js": "./graphical-heap.js?v=6",
                 "./code-panel.js": "./code-panel.js?v=1",
                 "@codemirror/state": "/node_modules/@codemirror/state/dist/index.js",
                 "@codemirror/view": "/node_modules/@codemirror/view/dist/index.js",
@@ -61,6 +61,6 @@
             }}
         </script>
         <!-- Serve from bases/rsptx/interactives so the import map reaches node_modules. -->
-        <script type="module" src="./demo.js?v=6"></script>
+        <script type="module" src="./demo.js?v=8"></script>
     </body>
 </html>

@@ -19,6 +19,7 @@ const arranged = () => vi.waitFor(() => {
 beforeEach(() => {
     viewer?.destroy();
     document.body.innerHTML = '<div id="viewer"></div>';
+    window.localStorage.clear();
     root = document.getElementById("viewer");
     layout.mockReset();
     layout.mockImplementation(async (nodes) => ({

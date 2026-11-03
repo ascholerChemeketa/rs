@@ -65,7 +65,12 @@ export function createGraphicalHeap({ canvas, prefix, onChange }) {
     arrange.type = reset.type = "button";
     actions.append(arrange, reset);
     movement.prepend(label, select);
-    controls.append(help, actions, movement, status);
+    // Arranging is occasional, so its tools stay collapsed; the status stays
+    // outside so layout messages are announced while they are closed.
+    const tools = element("details");
+    tools.className = "rs-codelens-memory__graph-tools";
+    tools.append(element("summary", t("cl_graph_tools")), help, actions, movement);
+    controls.append(status, tools);
 
     let cards = new Map();
     let references = [];
@@ -330,6 +335,9 @@ export function createGraphicalHeap({ canvas, prefix, onChange }) {
 
     return {
         element: controls,
+        get enabled() {
+            return enabled;
+        },
         beforeUpdate,
         sync(nextCards, nextReferences) {
             cards = nextCards;

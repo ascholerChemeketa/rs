@@ -35,6 +35,7 @@ load({
         "cl_graphical": "Graphical Diagram",
         "cl_text": "Text",
         "cl_memory_help": "References link to heap objects. All views contain the same information.",
+        "cl_graph_tools": "Arrange heap objects",
         "cl_graph_help": "Drag a Move button, use its arrow keys (Shift moves farther), or select an object and use the movement buttons. Escape cancels a drag. Positions persist across steps and views. Scroll to explore larger diagrams.",
         "cl_graph_viewport": "Graphical memory diagram",
         "cl_arrange": "Arrange automatically",

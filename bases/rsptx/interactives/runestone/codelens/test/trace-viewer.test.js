@@ -9,6 +9,7 @@ import aliases from "../frontend/fixtures/aliasing.json";
 
 beforeEach(() => {
     document.body.innerHTML = '<div id="viewer"></div><div id="other"></div>';
+    window.localStorage.clear();
 });
 
 describe("CodeLens trace viewer prototype", () => {
@@ -65,21 +66,52 @@ describe("CodeLens trace viewer prototype", () => {
         expect(viewer.stepForward()).toBe(false);
     });
 
-    it("reserves heap space only when some step in the trace uses it", () => {
+    it("shows the heap column for the whole run only when some step uses it", () => {
         const container = document.getElementById("viewer");
         mountTraceViewer(container, loop);
-        const stage = container.querySelector(".rs-codelens-memory__stage");
-        expect(stage.dataset.hasHeap).toBe("false");
+        const tools = () => container.querySelector(".rs-codelens-memory__graph-controls");
+        expect(container.querySelector(".rs-codelens-memory").dataset.hasHeap).toBe("false");
         expect(container.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(true);
-        const graphical = container.querySelector('input[value="graphical"]');
-        graphical.click();
-        expect(container.querySelector(".rs-codelens-memory__graph-controls").hidden).toBe(true);
-        expect(container.textContent).not.toContain("No heap objects at this step.");
+        container.querySelector('input[value="graphical"]').click();
+        expect(tools().hidden).toBe(true);
 
-        mountTraceViewer(container, sieve, { startingInstruction: 0 });
-        expect(container.querySelector(".rs-codelens-memory__stage").dataset.hasHeap).toBe("true");
+        // Sieve has no heap objects at its first step but uses the heap later.
+        const viewer = mountTraceViewer(container, sieve, { startingInstruction: 0 });
+        expect(container.querySelector(".rs-codelens-memory").dataset.hasHeap).toBe("true");
+        expect(container.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(false);
+        expect(tools().hidden).toBe(false);
+        viewer.goToEnd();
         expect(container.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(false);
         expect(container.textContent).not.toContain("No heap objects at this step.");
+    });
+
+    it("puts the arranging tools in a collapsed details element below the diagram", () => {
+        const container = document.getElementById("viewer");
+        mountTraceViewer(container, graph);
+        container.querySelector('input[value="graphical"]').click();
+        const viewport = container.querySelector(".rs-codelens-memory__viewport");
+        const tools = container.querySelector(".rs-codelens-memory__graph-tools");
+        expect(tools.tagName).toBe("DETAILS");
+        expect(tools.open).toBe(false);
+        expect(tools.querySelector("summary").textContent).toBe("Arrange heap objects");
+        expect(tools.querySelector("button")).not.toBeNull();
+        expect(viewport.compareDocumentPosition(tools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        // Layout messages stay outside the closed details so they are announced.
+        expect(tools.parentElement.querySelector('[role="status"]').closest("details")).toBeNull();
+    });
+
+    it("remembers the memory view for every CodeLens", () => {
+        const container = document.getElementById("viewer");
+        const other = document.getElementById("other");
+        mountTraceViewer(container, graph);
+        container.querySelector('input[value="text"]').click();
+        expect(window.localStorage.getItem("codelens-memory-view")).toBe("text");
+        mountTraceViewer(other, loop);
+        expect(other.querySelector('input[value="text"]').checked).toBe(true);
+        expect(other.querySelector(".rs-codelens-memory__stage").dataset.view).toBe("text");
+        window.localStorage.setItem("codelens-memory-view", "bogus");
+        mountTraceViewer(other, loop);
+        expect(other.querySelector('input[value="diagram"]').checked).toBe(true);
     });
 
     it("updates accessible variable rows and program output", () => {
