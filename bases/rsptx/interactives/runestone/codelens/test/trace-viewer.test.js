@@ -213,6 +213,15 @@ describe("CodeLens trace viewer prototype", () => {
         );
     });
 
+    it("shows program output only when the program prints", () => {
+        const container = document.getElementById("viewer");
+        mountTraceViewer(container, aliases);
+        expect(container.querySelector(".rs-codelens-prototype__output")).toBeNull();
+        expect([...container.querySelectorAll("h3")].map((node) => node.textContent)).not.toContain("Program output");
+        mountTraceViewer(container, hello);
+        expect(container.querySelector(".rs-codelens-prototype__output")).not.toBeNull();
+    });
+
     it("restores output and navigation boundaries when stepping back to the first snapshot", () => {
         const container = document.getElementById("viewer");
         const viewer = mountTraceViewer(container, hello);

@@ -79,7 +79,8 @@ describe("Java and C++ testbed samples", () => {
         }
         expect(viewer.currentStep).toBe(data.trace.length - 1);
         expect(viewer.stepForward()).toBe(false);
-        expect(root.querySelector(".rs-codelens-prototype__output").textContent).toBe(
+        // Programs that never print have no output area.
+        expect(root.querySelector(".rs-codelens-prototype__output")?.textContent ?? "").toBe(
             data.trace.at(-1).stdout ?? "",
         );
         expect(viewer.stepBackward()).toBe(true);

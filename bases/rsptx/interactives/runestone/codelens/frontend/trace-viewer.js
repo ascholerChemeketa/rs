@@ -163,16 +163,11 @@ export function mountTraceViewer(container, data, options = {}) {
     const outputHeading = element("h3", null, t("cl_output"));
     const output = element("pre", "rs-codelens-prototype__output");
     output.setAttribute("aria-label", t("cl_output"));
+    // Programs that never print get no output area.
+    const hasOutput = data.trace.some((entry) => typeof entry.stdout === "string" && entry.stdout.length > 0);
 
-    codePanel.append(
-        codeHeading,
-        codeView.element,
-        codeHelp,
-        controls,
-        status,
-        outputHeading,
-        output,
-    );
+    codePanel.append(codeHeading, codeView.element, codeHelp, controls, status);
+    if (hasOutput) codePanel.append(outputHeading, output);
     workspace.append(codePanel, memoryView.element);
     root.append(viewerHeading, layoutControls, workspace);
     container.replaceChildren(root);
