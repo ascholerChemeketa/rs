@@ -1,4 +1,4 @@
-import { mountTraceViewer } from "./trace-viewer.js?v=4";
+import { mountTraceViewer } from "./trace-viewer.js?v=5";
 
 const traceSelect = document.getElementById("trace");
 const themeToggle = document.getElementById("dark-theme");

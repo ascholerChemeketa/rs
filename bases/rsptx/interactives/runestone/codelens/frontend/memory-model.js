@@ -65,10 +65,14 @@ export function aggregateRows(value, parentKey) {
     }));
 }
 
+// Java reports a void method's return as ["VOID"]; there is no value to show.
+const isVoidReturn = (name, value) => name === "__return__" && Array.isArray(value) && value[0] === "VOID";
+
 function bindings(values = {}, order = [], prefix, language) {
     const names = [...new Set([...order, ...Object.keys(values)])];
     return names
         .filter((name) => Object.prototype.hasOwnProperty.call(values, name))
+        .filter((name) => !isVoidReturn(name, values[name]))
         .map((name) => ({
             key: memoryKey(...prefix, name),
             name: name === "__return__" ? t("cl_return") : name,
@@ -187,15 +191,37 @@ function normalizeObject(id, raw, language) {
     return object;
 }
 
-export function normalizeMemory(entry, language = "py3") {
+// Java names every constructor <init>. In simple programs the nearest class
+// declaration above the constructor's current line names its class.
+function javaConstructorClass(code, line) {
+    const lines = code.split("\n");
+    for (let index = Math.min(line, lines.length) - 1; index >= 0; index--) {
+        const match = /\b(?:class|record|enum)\s+([A-Za-z_$][\w$]*)/.exec(lines[index]);
+        if (match) return match[1];
+    }
+    return null;
+}
+
+export function normalizeMemory(entry, language = "py3", code = "") {
     return {
         globals: bindings(entry.globals, entry.ordered_globals, ["global"], language),
-        frames: (entry.stack_to_render ?? []).map((frame, index) => {
-            const id = String(frame.frame_id ?? frame.unique_hash ?? index);
+        frames: (entry.stack_to_render ?? []).map((frame, index, stack) => {
+            // Java traces append the line to the function name and number
+            // frames afresh at every step, so identify them by stack depth.
+            const java = language === "java";
+            const [, name, line] = java
+                ? /^(.*?)(?::(\d+))?$/.exec(String(frame.func_name))
+                : [null, frame.func_name];
+            const id = java
+                ? `${stack.length - 1 - index}-${name}`
+                : String(frame.frame_id ?? frame.unique_hash ?? index);
+            const className = java && name === "<init>" && line ? javaConstructorClass(code, Number(line)) : null;
+            let label = t("cl_frame", name, id);
+            if (java) label = className ? t("cl_constructor", className) : name;
             return {
                 id,
                 key: memoryKey("frame", id),
-                label: t("cl_frame", frame.func_name, id),
+                label,
                 active: Boolean(frame.is_highlighted),
                 retained: Boolean(frame.is_zombie),
                 parents: (frame.parent_frame_id_list ?? []).map(String),

@@ -216,7 +216,7 @@ export function mountTraceViewer(container, data, options = {}) {
         codeView.setMarkers({ current: entry.line, previous: step > 0 ? lineOf(step - 1) : null, breakpoints });
         updateButtons();
 
-        const memory = normalizeMemory(entry, options.lang);
+        const memory = normalizeMemory(entry, options.lang, data.code);
         const changes = memoryChanges(previousMemory, memory);
         memoryView.update(memory, changes);
         previousMemory = memory;

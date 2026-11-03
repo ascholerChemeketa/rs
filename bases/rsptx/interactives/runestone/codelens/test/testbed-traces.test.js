@@ -4,12 +4,26 @@ import { mountTraceViewer } from "../frontend/trace-viewer.js";
 import { normalizeMemory } from "../frontend/memory-model.js";
 import javaHello from "../frontend/fixtures/java-hello-world.json";
 import javaSieve from "../frontend/fixtures/java-sieve.json";
+import javaCallstack from "../frontend/fixtures/java-callstack.json";
 import cppSieve from "../frontend/fixtures/cpp-sieve.json";
 import cppPointers from "../frontend/fixtures/cpp-class-pointers.json";
 import cppPassingPointers from "../frontend/fixtures/cpp-passing-pointers.json";
 import cppReferencesFunctions from "../frontend/fixtures/cpp-references-functions.json";
 
 describe("Java and C++ testbed samples", () => {
+    it("names Java frames by function and keeps them stable across steps", () => {
+        document.body.innerHTML = '<div id="viewer"></div>';
+        const root = document.getElementById("viewer");
+        const viewer = mountTraceViewer(root, javaCallstack, { lang: "java", startingInstruction: 14 });
+        const titles = () => [...root.querySelectorAll(".rs-codelens-memory__card:not([data-heap-id]) h5")]
+            .map((node) => node.textContent);
+        expect(titles()).toEqual(expect.arrayContaining(["Foo constructor", "foo", "bar", "main"]));
+        expect(titles().join(" ")).not.toMatch(/:\d|frame|<init>/);
+        viewer.stepForward();
+        expect(root.querySelector('[role="status"]').textContent).not.toMatch(/frame|added|removed/i);
+        viewer.destroy();
+    });
+
     it.each([
         ["primitive", cppPassingPointers, "int at 0x5C22040"],
         ["struct", cppPointers, "Computer at 0x5C1E040"],
@@ -104,5 +118,21 @@ describe("Java and C++ testbed samples", () => {
         expect(struct.type).toBe("Computer");
         expect(struct.fields[0].name).toBe("processorspeed");
         expect(struct.fields[0].value.type).toBe("int");
+    });
+
+    it.each([
+        ["Java Hello World", "java", javaHello],
+        ["Java Sieve", "java", javaSieve],
+        ["Java call stack", "java", javaCallstack],
+        ["C++ Sieve", "cpp", cppSieve],
+        ["C++ classes and pointers", "cpp", cppPointers],
+        ["C++ passing pointers", "cpp", cppPassingPointers],
+        ["C++ references and functions", "cpp", cppReferencesFunctions],
+    ])("shows no void or unsupported values in %s",(_name, lang, data) => {
+        for (const entry of data.trace) {
+            const memory = normalizeMemory(entry, lang, data.code);
+            const text = JSON.stringify([memory.globals, memory.frames, [...memory.objects.values()]]);
+            expect(text).not.toMatch(/VOID|Unsupported/);
+        }
     });
 });

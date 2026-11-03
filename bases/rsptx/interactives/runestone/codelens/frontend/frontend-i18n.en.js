@@ -56,6 +56,7 @@ load({
         "cl_no_locals": "No local variables in this frame.",
         "cl_heap": "Heap objects",
         "cl_frame": "$1 — frame $2",
+        "cl_constructor": "$1 constructor",
         "cl_active": "Active frame",
         "cl_retained": "Retained frame (returned)",
         "cl_parent": "Enclosing frame $1",
