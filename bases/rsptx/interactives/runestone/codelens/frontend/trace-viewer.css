@@ -31,6 +31,66 @@
     background: var(--background, Canvas);
 }
 
+/* Checkpoint questions sit below the workspace so memory stays inspectable. */
+.rs-codelens-checkpoint {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.rs-codelens-checkpoint h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1em;
+}
+
+.rs-codelens-checkpoint__form {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.rs-codelens-checkpoint__form[hidden] {
+    display: none;
+}
+
+.rs-codelens-checkpoint__answer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.rs-codelens-checkpoint__answer input {
+    min-width: 8rem;
+    padding: 0.3em 0.5em;
+    border: 1px solid currentColor;
+    border-radius: 0.25em;
+    color: inherit;
+    background: var(--background, Canvas);
+    font: inherit;
+}
+
+.rs-codelens-checkpoint__answer input:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+.rs-codelens-checkpoint__answer input:read-only {
+    border-style: dashed;
+}
+
+.rs-codelens-checkpoint__feedback {
+    margin: 0.5rem 0 0;
+}
+
+/* The message and the running count read as separate lines. */
+.rs-codelens-checkpoint__feedback > span {
+    display: block;
+}
+
+.rs-codelens-checkpoint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .rs-codelens-prototype__workspace {
     display: grid;
     grid-template-columns: minmax(0, 1fr);

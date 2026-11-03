@@ -41,20 +41,35 @@ describe("CodeLens prototype opt-in", () => {
         expect(RunestoneBase.prototype.logBookEvent.mock.calls).toHaveLength(calls);
     });
 
-    it("keeps the legacy renderer for a trace with questions", () => {
+    it("keeps the legacy renderer for a trace that asks for input", () => {
         window.history.replaceState({}, "", "/?codelensPrototype=trace-one");
         const legacy = vi.fn(() => ({ domRoot: $("#trace-one") }));
         globalThis.addVisualizerToPage = legacy;
         globalThis.allTraceData = {
-            "trace-one": {
-                ...hello,
-                trace: [{ ...hello.trace[0], question: { text: "Question" } }, hello.trace[1]],
-            },
+            "trace-one": { ...hello, trace: [...hello.trace, { ...hello.trace[1], event: "raw_input" }] },
         };
 
         window.component_factory.codelens({ orig: document.getElementById("component") });
         expect(legacy).toHaveBeenCalledOnce();
         expect(document.querySelector(".rs-codelens-prototype")).toBeNull();
+    });
+
+    it("asks checkpoint questions in the new viewer and logs each answer", () => {
+        window.history.replaceState({}, "", "/?codelensPrototype=trace-one");
+        globalThis.allTraceData = {
+            "trace-one": {
+                ...hello,
+                trace: [{ ...hello.trace[0], question: { text: "Question", correctText: "42" } }, hello.trace[1]],
+            },
+        };
+
+        window.component_factory.codelens({ orig: document.getElementById("component") });
+        const root = document.getElementById("trace-one");
+        root.querySelector(".rs-codelens-checkpoint input").value = "42";
+        root.querySelector(".rs-codelens-checkpoint form").requestSubmit();
+        expect(RunestoneBase.prototype.logBookEvent).toHaveBeenCalledWith(expect.objectContaining({
+            event: "codelens", act: "answer", div_id: "trace-one", answer: "0:42", correct: true, percent: 1,
+        }));
     });
 
     it("also opts in through the login-complete initialization path", () => {

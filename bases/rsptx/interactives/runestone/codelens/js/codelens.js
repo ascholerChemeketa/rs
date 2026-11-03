@@ -74,7 +74,6 @@ function renderVisualizer(data, divid, lang) {
             divid &&
         !data.trace.some(
             (entry) =>
-                entry.question ||
                 entry.event === "raw_input" ||
                 entry.event === "mouse_input",
         );

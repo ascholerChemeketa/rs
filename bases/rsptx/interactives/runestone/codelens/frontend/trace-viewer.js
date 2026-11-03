@@ -7,6 +7,7 @@ import {
 } from "./memory-model.js";
 import { createMemoryView } from "./memory-view.js";
 import { createCodePanel } from "./code-panel.js";
+import { createCheckpoints } from "./checkpoints.js";
 
 const mountedViewers = new WeakMap();
 let nextViewerId = 0;
@@ -108,7 +109,8 @@ export function mountTraceViewer(container, data, options = {}) {
     const layoutControls = element("div", "rs-codelens-prototype__layout-control");
     const layoutLabel = element("label", null, t("cl_viewer_layout"));
     const layoutSelect = element("select");
-    layoutSelect.id = `rs-codelens-layout-${++nextViewerId}`;
+    const prefix = `rs-codelens-${++nextViewerId}`;
+    layoutSelect.id = `${prefix}-layout`;
     layoutLabel.htmlFor = layoutSelect.id;
     for (const mode of ["auto", "side-by-side", "stacked"]) {
         const option = element("option", null, t(`cl_layout_${mode}`));
@@ -185,11 +187,25 @@ export function mountTraceViewer(container, data, options = {}) {
     output.setAttribute("aria-label", t("cl_output"));
     // Programs that never print get no output area.
     const hasOutput = data.trace.some((entry) => typeof entry.stdout === "string" && entry.stdout.length > 0);
+    const checkpoints = createCheckpoints({
+        trace: data.trace,
+        prefix,
+        // Runestone records answers from this event (see js/codelens.js).
+        onAnswer(detail) {
+            window.dispatchEvent(new CustomEvent("codelens:answer", {
+                detail: { divid: options.divid ?? container.id, ...detail },
+            }));
+        },
+        onSettled() {
+            updateButtons();
+            buttons.fwd.focus();
+        },
+    });
 
     codePanel.append(codeHeading, codeView.element, codeHelp, controls, status);
     if (hasOutput) codePanel.append(outputHeading, output);
     workspace.append(codePanel, memoryView.element);
-    root.append(viewerHeading, workspace, layoutControls);
+    root.append(viewerHeading, workspace, ...(checkpoints.element ? [checkpoints.element] : []), layoutControls);
     container.replaceChildren(root);
 
     // A breakpoint stops where execution arrives on its line, so a line that
@@ -207,13 +223,16 @@ export function mountTraceViewer(container, data, options = {}) {
 
     function updateButtons() {
         const last = data.trace.length - 1;
+        // An open question holds forward moves; the buttons stay operable so
+        // pressing one can say why and move to the answer field.
+        const held = checkpoints.blocks(step);
         for (const [action, disabled] of [
             ["first", step === 0],
             ["back", step === 0],
-            ["fwd", step === last],
-            ["last", step === last],
+            ["fwd", step === last || held],
+            ["last", step === last || held],
             ["prevbp", breakpointStep(-1) === null],
-            ["nextbp", breakpointStep(1) === null],
+            ["nextbp", breakpointStep(1) === null || held],
         ]) {
             buttons[action].setAttribute("aria-disabled", String(disabled));
         }
@@ -255,6 +274,10 @@ export function mountTraceViewer(container, data, options = {}) {
         if (changes.length > 3) {
             announcement += ` ${t("cl_more_changes", changes.length - 3)}`;
         }
+        checkpoints.show(step);
+        if (checkpoints.blocks(step)) {
+            announcement += ` ${t("cl_question_at_step", checkpoints.promptText(step))}`;
+        }
         if (previousStep !== null) {
             const oldStdout = data.trace[previousStep].stdout ?? "";
             if (stdout !== oldStdout) {
@@ -272,6 +295,18 @@ export function mountTraceViewer(container, data, options = {}) {
     function goToStep(destination, atBreakpoint = false) {
         if (destroyed || destination === null || destination === step ||
             destination < 0 || destination >= data.trace.length) return false;
+        if (destination > step) {
+            const checkpoint = checkpoints.firstBlocking(step, destination);
+            if (checkpoint === step) {
+                status.textContent = t("cl_question_blocked");
+                checkpoints.focus();
+                return false;
+            }
+            if (checkpoint !== null) {
+                destination = checkpoint;
+                atBreakpoint = false;
+            }
+        }
         const previousStep = step;
         step = destination;
         render(previousStep, atBreakpoint);
