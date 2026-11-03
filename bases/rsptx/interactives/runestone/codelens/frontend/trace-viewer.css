@@ -603,15 +603,16 @@
     display: none;
 }
 
+/* No height cap: the graphical view is for arranging objects freely, for
+   example before taking a screenshot. */
 .rs-codelens-memory__viewport[data-view="graphical"] {
-    max-height: 40rem;
     overflow: auto;
     border: 1px solid var(--componentBorderColor, currentColor);
     border-radius: 0.5rem;
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] {
-    grid-template-columns: var(--cl-stack-width, 16rem) max-content;
+    grid-template-columns: calc(var(--cl-stack-width, 16rem) - 4rem) max-content;
     gap: 1.5rem;
     width: max-content;
     min-width: 100%;
@@ -627,9 +628,27 @@
 
 .rs-codelens-memory__stage[data-view="graphical"] [data-heap-id] {
     position: absolute;
-    width: var(--cl-card-width, 16rem);
+    width: fit-content;
     box-sizing: border-box;
     margin: 0;
+}
+
+/* Stack cards fill their narrower column; heap cards shrink to their contents. */
+.rs-codelens-memory__stage[data-view="graphical"] [data-heap-id] {
+    min-width: 8rem;
+    max-width: calc(var(--cl-card-width, 16rem) - 4rem);
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__card table {
+    table-layout: auto;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__card th {
+    overflow-wrap: normal;
+}
+
+.rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__card th:first-child {
+    width: auto;
 }
 
 .rs-codelens-memory__stage[data-view="graphical"] .rs-codelens-memory__move-handle {
