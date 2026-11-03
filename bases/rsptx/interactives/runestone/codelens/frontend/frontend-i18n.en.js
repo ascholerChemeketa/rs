@@ -86,6 +86,7 @@ load({
         "cl_instance": "$1 instance $2",
         "cl_class": "$1 class $2",
         "cl_function": "Function $1",
+        "cl_function_value": "function $1",
         "cl_primitive": "$1 object $2",
         "cl_object": "Object $1 ($2)",
         "cl_reference": "Reference to $1",

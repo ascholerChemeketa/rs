@@ -202,9 +202,53 @@ function javaConstructorClass(code, line) {
     return null;
 }
 
-export function normalizeMemory(entry, language = "py3", code = "") {
+function forEachReference(value, visit) {
+    if (!Array.isArray(value)) return;
+    if (value[0] === "REF" && value.length === 2) visit(String(value[1]));
+    else for (const item of value) forEachReference(item, visit);
+}
+
+/**
+ * Python functions that are only ever reached through their own global name,
+ * across the whole trace. These read as values, so they need no heap card.
+ * A function stays on the heap when it is nested, has defaults, or is passed,
+ * stored, or aliased anywhere in the run.
+ */
+export function findInlineFunctions(trace, language = "py3") {
+    const inline = new Map();
+    if (!language.startsWith("py")) return inline;
+    const rejected = new Set();
+    for (const entry of trace) {
+        for (const [id, raw] of Object.entries(entry.heap ?? {})) {
+            if (raw[0] !== "FUNCTION") continue;
+            if (raw[2] !== null || (raw[3] ?? []).length > 0) rejected.add(id);
+            else inline.set(id, String(raw[1]));
+        }
+    }
+    for (const entry of trace) {
+        for (const [name, value] of Object.entries(entry.globals ?? {})) {
+            forEachReference(value, (id) => {
+                if (!inline.has(id)) return;
+                const own = value[0] === "REF" && inline.get(id).split("(")[0] === name;
+                if (!own) rejected.add(id);
+            });
+        }
+        const elsewhere = [
+            ...(entry.stack_to_render ?? []).map((frame) => frame.encoded_locals),
+            ...Object.values(entry.heap ?? {}),
+        ];
+        forEachReference(elsewhere.map((values) => Object.values(values ?? {})), (id) => rejected.add(id));
+    }
+    for (const id of rejected) inline.delete(id);
+    return inline;
+}
+
+export function normalizeMemory(entry, language = "py3", code = "", inlineFunctions = new Map()) {
+    const inlineValue = (raw) => raw?.[0] === "REF" && inlineFunctions.has(String(raw[1]))
+        ? literal(t("cl_function_value", inlineFunctions.get(String(raw[1])))) : null;
     return {
-        globals: bindings(entry.globals, entry.ordered_globals, ["global"], language),
+        globals: bindings(entry.globals, entry.ordered_globals, ["global"], language)
+            .map((row) => ({ ...row, value: inlineValue(entry.globals[row.name]) ?? row.value })),
         frames: (entry.stack_to_render ?? []).map((frame, index, stack) => {
             // Java traces append the line to the function name and number
             // frames afresh at every step, so identify them by stack depth.
@@ -234,9 +278,9 @@ export function normalizeMemory(entry, language = "py3", code = "") {
             };
         }),
         objects: new Map(
-            Object.entries(entry.heap ?? {}).map(([id, raw]) => [
-                id, normalizeObject(id, raw, language),
-            ]),
+            Object.entries(entry.heap ?? {})
+                .filter(([id]) => !inlineFunctions.has(id))
+                .map(([id, raw]) => [id, normalizeObject(id, raw, language)]),
         ),
     };
 }

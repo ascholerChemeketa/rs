@@ -2,7 +2,7 @@
 // The trace format is produced elsewhere; this module never executes code.
 import { t } from "../../common/js/rsi18n.js";
 import "./frontend-i18n.en.js";
-import { normalizeMemory, memoryChanges } from "./memory-model.js";
+import { normalizeMemory, memoryChanges, findInlineFunctions } from "./memory-model.js";
 import { createMemoryView } from "./memory-view.js";
 import { createCodePanel } from "./code-panel.js";
 
@@ -157,7 +157,9 @@ export function mountTraceViewer(container, data, options = {}) {
     status.setAttribute("aria-live", "polite");
     status.setAttribute("aria-atomic", "true");
 
-    const hasHeap = data.trace.some((entry) => Object.keys(entry.heap ?? {}).length > 0);
+    const inlineFunctions = findInlineFunctions(data.trace, options.lang);
+    const hasHeap = data.trace.some((entry) =>
+        Object.keys(entry.heap ?? {}).some((id) => !inlineFunctions.has(id)));
     const memoryView = createMemoryView({ hasHeap });
     let previousMemory = null;
     const outputHeading = element("h3", null, t("cl_output"));
@@ -216,7 +218,7 @@ export function mountTraceViewer(container, data, options = {}) {
         codeView.setMarkers({ current: entry.line, previous: step > 0 ? lineOf(step - 1) : null, breakpoints });
         updateButtons();
 
-        const memory = normalizeMemory(entry, options.lang, data.code);
+        const memory = normalizeMemory(entry, options.lang, data.code, inlineFunctions);
         const changes = memoryChanges(previousMemory, memory);
         memoryView.update(memory, changes);
         previousMemory = memory;

@@ -1,7 +1,14 @@
 // No jQuery shim: all layouts share the same native, semantic memory tree.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
-import graph from "../frontend/fixtures/memory-graph.json";
+import memoryGraph from "../frontend/fixtures/memory-graph.json";
+
+// A default argument keeps visit() on the heap, so these layout tests have
+// three objects to arrange.
+const graph = structuredClone(memoryGraph);
+for (const entry of graph.trace) {
+    for (const raw of Object.values(entry.heap)) if (raw[0] === "FUNCTION") raw[3] = [["n", 1]];
+}
 
 const layout = vi.hoisted(() => vi.fn());
 vi.mock("../frontend/elk-layout.js", () => ({ layoutHeap: layout }));

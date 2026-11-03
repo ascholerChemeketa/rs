@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeMemory, memoryChanges, valueText } from "../frontend/memory-model.js";
+import { normalizeMemory, memoryChanges, valueText, findInlineFunctions } from "../frontend/memory-model.js";
 import graph from "../frontend/fixtures/memory-graph.json";
 
 describe("CodeLens memory snapshots", () => {
@@ -135,5 +135,31 @@ describe("CodeLens memory snapshots", () => {
         expect(memoryChanges(before, reordered)).toEqual([]);
         const removed = normalizeMemory({ heap: { 1: ["SET", 2] } });
         expect(memoryChanges(before, removed).map((change) => change.text)).toEqual(["Set 1, member 1 removed (was 1)."]);
+    });
+
+    it("shows functions inline only when their own global name is the sole reference in the whole run", () => {
+        const step = (globals, heap, locals = {}) => ({
+            globals, heap, stack_to_render: [{ func_name: "f", encoded_locals: locals }],
+        });
+        const plain = ["FUNCTION", "f(x)", null];
+        expect([...findInlineFunctions([step({ f: ["REF", 1] }, { 1: plain })])]).toEqual([["1", "f(x)"]]);
+        expect(findInlineFunctions([step({ f: ["REF", 1] }, { 1: plain })], "java").size).toBe(0);
+        // Aliased, passed as an argument, stored in a list, nested, or with defaults.
+        expect(findInlineFunctions([step({ f: ["REF", 1], g: ["REF", 1] }, { 1: plain })]).size).toBe(0);
+        expect(findInlineFunctions([
+            step({ f: ["REF", 1] }, { 1: plain }),
+            step({ f: ["REF", 1] }, { 1: plain }, { callback: ["REF", 1] }),
+        ]).size).toBe(0);
+        expect(findInlineFunctions([step({ f: ["REF", 1], xs: ["REF", 2] }, { 1: plain, 2: ["LIST", ["REF", 1]] })]).size).toBe(0);
+        expect(findInlineFunctions([step({ f: ["REF", 1] }, { 1: ["FUNCTION", "f(x)", 3] })]).size).toBe(0);
+        expect(findInlineFunctions([step({ f: ["REF", 1] }, { 1: ["FUNCTION", "f(x)", null, [["x", 1]]] })]).size).toBe(0);
+        expect(findInlineFunctions([step({ g: ["REF", 1] }, { 1: ["FUNCTION", "<lambda>(x)", null] })]).size).toBe(0);
+    });
+
+    it("renders an inline function as a value with no heap object", () => {
+        const inline = findInlineFunctions(graph.trace);
+        const memory = normalizeMemory(graph.trace[6], "py3", graph.code, inline);
+        expect(memory.objects.has("1")).toBe(false);
+        expect(valueText(memory.globals.find((row) => row.name === "visit").value, memory)).toBe("function visit(node)");
     });
 });
