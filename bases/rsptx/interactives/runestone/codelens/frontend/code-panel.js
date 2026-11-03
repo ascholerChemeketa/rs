@@ -1,9 +1,9 @@
 // Read-only CodeMirror 6 display of the traced program: syntax highlighting,
 // current/previous line markers, and a breakpoint gutter.
-import { EditorState, StateEffect, StateField } from "@codemirror/state";
+import { Compartment, EditorState, StateEffect, StateField } from "@codemirror/state";
 import { EditorView, Decoration, GutterMarker, WidgetType, gutter, lineNumbers } from "@codemirror/view";
-import { LRLanguage, syntaxHighlighting } from "@codemirror/language";
-import { classHighlighter } from "@lezer/highlight";
+import { LRLanguage } from "@codemirror/language";
+import { vscodeDark, vscodeLight } from "@uiw/codemirror-theme-vscode";
 import { parser as pythonParser } from "@lezer/python";
 import { parser as javaParser } from "@lezer/java";
 import { parser as cppParser } from "@lezer/cpp";
@@ -17,6 +17,14 @@ function languageFor(lang = "") {
             : lang === "cpp" || lang === "c" ? cppParser : null;
     return parser ? LRLanguage.define({ parser }) : [];
 }
+
+// Runestone marks dark mode with either a dark-mode class or data-theme="dark".
+function pageIsDark() {
+    const root = document.documentElement;
+    return root.classList.contains("dark-mode") || root.dataset.theme === "dark";
+}
+
+const themeFor = (dark) => (dark ? vscodeDark : vscodeLight);
 
 const setMarkers = StateEffect.define();
 const markersField = StateField.define({
@@ -95,6 +103,8 @@ export function createCodePanel({ code, lang, breakableLines, onToggleBreakpoint
         return true;
     };
     const handlers = { mousedown: toggle };
+    const theme = new Compartment();
+    let dark = pageIsDark();
     const markersChanged = (update) =>
         update.transactions.some((transaction) => transaction.effects.some((effect) => effect.is(setMarkers)));
     const view = new EditorView({
@@ -108,7 +118,7 @@ export function createCodePanel({ code, lang, breakableLines, onToggleBreakpoint
                 EditorView.contentAttributes.of({ role: "group", "aria-label": t("cl_code") }),
                 EditorView.decorations.compute([markersField], lineDecorations),
                 languageFor(lang),
-                syntaxHighlighting(classHighlighter),
+                theme.of(themeFor(dark)),
                 gutter({
                     class: "rs-codelens-code__breakpoints",
                     lineMarker(view, block) {
@@ -131,6 +141,13 @@ export function createCodePanel({ code, lang, breakableLines, onToggleBreakpoint
         }),
     });
     let markers = view.state.field(markersField);
+    // Follow the page when its theme changes.
+    const themeObserver = new MutationObserver(() => {
+        if (pageIsDark() === dark) return;
+        dark = pageIsDark();
+        view.dispatch({ effects: theme.reconfigure(themeFor(dark)) });
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme"] });
 
     return {
         element,
@@ -139,6 +156,7 @@ export function createCodePanel({ code, lang, breakableLines, onToggleBreakpoint
             view.dispatch({ effects: setMarkers.of(markers) });
         },
         destroy() {
+            themeObserver.disconnect();
             view.destroy();
         },
     };

@@ -87,36 +87,28 @@
     container-type: inline-size;
 }
 
-/* CodeMirror 6 display. Token and marker colors are mixed toward the text
-   color, so they keep their contrast in light and dark themes. */
+/* CodeMirror 6 display. The VS Code light and dark themes color the code and
+   gutters; marker colors are mixed toward the page text color so they keep
+   their contrast in both. */
 .rs-codelens-prototype__code {
     --cl-code-ink: var(--bodyFont, CanvasText);
-    --cl-code-bg: var(--codeBlockBg, var(--background, Canvas));
-    --cl-code-current: color-mix(in srgb, #f59e0b 28%, var(--cl-code-bg));
+    /* VS Code's editor.stackFrameHighlightBackground for its light and dark themes. */
+    --cl-code-current: #ffff6673;
     --cl-code-arrow: color-mix(in srgb, #2563eb 75%, var(--cl-code-ink));
     --cl-code-breakpoint: color-mix(in srgb, #dc2626 85%, var(--cl-code-ink));
     overflow: hidden;
     border: 1px solid var(--componentBorderColor, currentColor);
     border-radius: 0.25rem;
-    background: var(--cl-code-bg);
-    color: var(--cl-code-ink);
 }
 
-.rs-codelens-prototype__code .cm-editor {
-    background: var(--cl-code-bg);
-    color: var(--cl-code-ink);
+:root.dark-mode .rs-codelens-prototype__code,
+[data-theme="dark"] .rs-codelens-prototype__code {
+    --cl-code-current: #ffff0033;
 }
 
 .rs-codelens-prototype__code .cm-editor .cm-scroller {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.875em;
     line-height: 1.5;
-}
-
-.rs-codelens-prototype__code .cm-editor .cm-gutters {
-    border-inline-end: 1px solid color-mix(in srgb, var(--cl-code-ink) 20%, var(--cl-code-bg));
-    background: color-mix(in srgb, var(--cl-code-ink) 5%, var(--cl-code-bg));
-    color: color-mix(in srgb, var(--cl-code-ink) 70%, var(--cl-code-bg));
 }
 
 .rs-codelens-prototype__code .cm-lineNumbers .cm-gutterElement,
@@ -167,35 +159,7 @@
 }
 
 .rs-codelens-code__marker[data-kinds~="previous"]::after {
-    border-inline-start-color: color-mix(in srgb, var(--cl-code-arrow) 40%, var(--cl-code-bg));
-}
-
-.rs-codelens-prototype__code .tok-keyword,
-.rs-codelens-prototype__code .tok-operatorKeyword,
-.rs-codelens-prototype__code .tok-controlKeyword {
-    color: color-mix(in srgb, #9333ea 75%, var(--cl-code-ink));
-}
-
-.rs-codelens-prototype__code .tok-string,
-.rs-codelens-prototype__code .tok-string2 {
-    color: color-mix(in srgb, #15803d 75%, var(--cl-code-ink));
-}
-
-.rs-codelens-prototype__code :is(.tok-number, .tok-bool, .tok-atom, .tok-literal) {
-    color: color-mix(in srgb, #c2410c 75%, var(--cl-code-ink));
-}
-
-.rs-codelens-prototype__code :is(.tok-typeName, .tok-className, .tok-namespace) {
-    color: color-mix(in srgb, #0e7490 75%, var(--cl-code-ink));
-}
-
-.rs-codelens-prototype__code :is(.tok-definition, .tok-meta) {
-    color: color-mix(in srgb, #1d4ed8 75%, var(--cl-code-ink));
-}
-
-.rs-codelens-prototype__code .tok-comment {
-    color: color-mix(in srgb, var(--cl-code-ink) 68%, var(--cl-code-bg));
-    font-style: italic;
+    border-inline-start-color: color-mix(in srgb, var(--cl-code-arrow) 40%, transparent);
 }
 
 .rs-codelens-prototype__code-help {

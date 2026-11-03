@@ -52,6 +52,7 @@
         "@lezer/java": "^1.1.5",
         "@lezer/python": "^1.1.19",
         "@mapbox/node-pre-gyp": "^2.0.0",
+        "@uiw/codemirror-theme-vscode": "^4.25.12",
         "btm-expressions": "^0.1.12",
         "byte-base64": "^1.1.0",
         "codemirror": "^5.59.4",

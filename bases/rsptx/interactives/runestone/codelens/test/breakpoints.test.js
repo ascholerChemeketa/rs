@@ -97,4 +97,24 @@ describe("CodeLens breakpoints", () => {
         expect(lines()[6].classList.contains("rs-codelens-code__line--breakpoint")).toBe(true);
         viewer.destroy();
     });
+
+    it("switches between the VS Code light and dark themes with the page", async () => {
+        const container = document.getElementById("viewer");
+        const viewer = mountTraceViewer(container, graph);
+        const editor = container.querySelector(".cm-editor");
+        const light = editor.className;
+        document.documentElement.dataset.theme = "dark";
+        await Promise.resolve(); // MutationObserver callbacks run as microtasks.
+        const dark = editor.className;
+        expect(dark).not.toBe(light);
+        document.documentElement.dataset.theme = "light";
+        await Promise.resolve();
+        expect(editor.className).toBe(light);
+        document.documentElement.classList.add("dark-mode");
+        await Promise.resolve();
+        expect(editor.className).toBe(dark);
+        document.documentElement.classList.remove("dark-mode");
+        delete document.documentElement.dataset.theme;
+        viewer.destroy();
+    });
 });
