@@ -48,28 +48,25 @@ export function createMemoryView({ hasHeap = true } = {}) {
     heading.id = `${prefix}-heading`;
     heading.tabIndex = -1;
     root.setAttribute("aria-labelledby", heading.id);
-    const viewControls = element("fieldset", "rs-codelens-memory__view-controls");
-    viewControls.append(element("legend", null, t("cl_memory_view")));
+    const viewControls = element("div", "rs-codelens-memory__view-controls");
+    const viewLabel = element("label", null, t("cl_memory_view"));
+    const viewSelect = element("select");
+    viewSelect.id = `${prefix}-view`;
+    viewLabel.htmlFor = viewSelect.id;
+    viewControls.append(viewLabel, viewSelect);
     const stage = element("div", "rs-codelens-memory__stage");
     const viewport = element("div", "rs-codelens-memory__viewport");
     const initialView = loadViewMode();
     for (const mode of viewModes) {
-        const label = element("label");
-        const radio = element("input");
-        radio.type = "radio";
-        radio.name = `${prefix}-view`;
-        radio.value = mode;
-        radio.checked = mode === initialView;
-        radio.addEventListener("change", () => {
-            if (radio.checked) {
-                saveViewMode(mode);
-                setView(mode);
-            }
-        });
-        label.append(radio, document.createTextNode(` ${t(`cl_${mode}`)}`));
-        viewControls.append(label);
+        const option = element("option", null, t(`cl_${mode}`));
+        option.value = mode;
+        viewSelect.append(option);
     }
-    const help = element("p", "rs-codelens-memory__help", t("cl_memory_help"));
+    viewSelect.value = initialView;
+    viewSelect.addEventListener("change", () => {
+        saveViewMode(viewSelect.value);
+        setView(viewSelect.value);
+    });
     const overlay = svgElement("svg", {
         class: "rs-codelens-memory__connectors",
         "aria-hidden": "true",
@@ -86,7 +83,7 @@ export function createMemoryView({ hasHeap = true } = {}) {
     changeDetails.hidden = true;
     stage.append(overlay, stack, heap);
     viewport.append(stage);
-    root.append(heading, viewControls, help, viewport, graphical.element, changeDetails);
+    root.append(heading, viewControls, viewport, graphical.element, changeDetails);
 
     function setView(mode) {
         stage.dataset.view = mode;

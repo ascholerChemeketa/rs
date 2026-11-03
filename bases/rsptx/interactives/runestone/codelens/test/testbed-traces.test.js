@@ -1,6 +1,7 @@
 // Real Java and C++ traces should remain navigable before their full adapters exist.
 import { describe, expect, it } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
+import { chooseView } from "./view-helpers.js";
 import { normalizeMemory } from "../frontend/memory-model.js";
 import javaHello from "../frontend/fixtures/java-hello-world.json";
 import javaSieve from "../frontend/fixtures/java-sieve.json";
@@ -33,7 +34,7 @@ describe("Java and C++ testbed samples", () => {
         const startingInstruction = data.trace.findIndex((step) => Object.keys(step.heap).length > 0);
         const viewer = mountTraceViewer(root, data, { lang: "cpp", startingInstruction });
         for (const mode of ["diagram", "graphical", "text"]) {
-            root.querySelector(`input[value="${mode}"]`).click();
+            chooseView(root, mode);
             const card = root.querySelector("[data-heap-id]");
             expect(card.querySelector("h5").textContent).toBe(label);
             expect(card.textContent).not.toContain("Array");

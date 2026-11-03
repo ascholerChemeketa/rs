@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
+import { chooseView } from "./view-helpers.js";
 
 const data = (address, type, value) => ["C_DATA", address, type, value];
 
@@ -24,7 +25,7 @@ describe("C++ pointer links", () => {
         const viewer = mountTraceViewer(root, { code: "example", trace: [snapshot] }, { lang: "cpp" });
         const hash = window.location.hash;
         for (const mode of ["diagram", "graphical", "text"]) {
-            root.querySelector(`input[value="${mode}"]`).click();
+            chooseView(root, mode);
             for (const [address, name] of [["0x00020", "x"], ["0x30", "p"], ["0x44", "second"], ["0x40", "holder"]]) {
                 const links = [...root.querySelectorAll("a")].filter((link) => link.textContent === address);
                 expect(links.length).toBeGreaterThan(0);

@@ -171,7 +171,7 @@ export function mountTraceViewer(container, data, options = {}) {
     codePanel.append(codeHeading, codeView.element, codeHelp, controls, status);
     if (hasOutput) codePanel.append(outputHeading, output);
     workspace.append(codePanel, memoryView.element);
-    root.append(viewerHeading, layoutControls, workspace);
+    root.append(viewerHeading, workspace, layoutControls);
     container.replaceChildren(root);
 
     // A breakpoint stops where execution arrives on its line, so a line that

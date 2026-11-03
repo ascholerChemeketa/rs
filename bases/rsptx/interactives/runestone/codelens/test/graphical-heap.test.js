@@ -1,6 +1,7 @@
 // No jQuery shim: all layouts share the same native, semantic memory tree.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
+import { chooseView } from "./view-helpers.js";
 import memoryGraph from "../frontend/fixtures/memory-graph.json";
 
 // A default argument keeps visit() on the heap, so these layout tests have
@@ -17,7 +18,7 @@ let viewer;
 let root;
 const button = (name) => [...root.querySelectorAll("button")].find((node) => node.textContent === name);
 const card = (id) => root.querySelector(`[data-heap-id="${id}"]`);
-const selectMode = (mode) => root.querySelector(`input[value="${mode}"]`).click();
+const selectMode = (mode) => chooseView(root, mode);
 const positions = () => [...root.querySelectorAll("[data-heap-id]")].map((node) => [node.dataset.heapId, node.style.left, node.style.top]);
 const arranged = () => vi.waitFor(() => {
     expect(root.textContent).toContain("Heap objects arranged.");

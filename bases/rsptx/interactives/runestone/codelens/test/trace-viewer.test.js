@@ -1,6 +1,7 @@
 // The prototype viewer must work without the jQuery globals shim.
 import { beforeEach, describe, expect, it } from "vitest";
 import { mountTraceViewer } from "../frontend/trace-viewer.js";
+import { chooseView, viewSelect } from "./view-helpers.js";
 import hello from "../frontend/fixtures/hello-world.json";
 import loop from "../frontend/fixtures/loop-output.json";
 import sieve from "../frontend/fixtures/sieve.json";
@@ -31,7 +32,7 @@ describe("CodeLens trace viewer prototype", () => {
         const changed = container.querySelectorAll(".rs-codelens-memory__row--changed");
         expect(changed).toHaveLength(1);
         expect(changed[0].querySelector("th").firstChild.textContent).toBe("x");
-        container.querySelector('input[value="text"]').click();
+        chooseView(container, "text");
         expect(container.querySelectorAll('table[aria-label]')).toHaveLength(2);
         viewer.destroy();
     });
@@ -72,7 +73,7 @@ describe("CodeLens trace viewer prototype", () => {
         const tools = () => container.querySelector(".rs-codelens-memory__graph-controls");
         expect(container.querySelector(".rs-codelens-memory").dataset.hasHeap).toBe("false");
         expect(container.querySelector(".rs-codelens-memory__column--heap").hidden).toBe(true);
-        container.querySelector('input[value="graphical"]').click();
+        chooseView(container, "graphical");
         expect(tools().hidden).toBe(true);
 
         // Sieve has no heap objects at its first step but uses the heap later.
@@ -88,7 +89,7 @@ describe("CodeLens trace viewer prototype", () => {
     it("puts the arranging tools in a collapsed details element below the diagram", () => {
         const container = document.getElementById("viewer");
         mountTraceViewer(container, graph);
-        container.querySelector('input[value="graphical"]').click();
+        chooseView(container, "graphical");
         const viewport = container.querySelector(".rs-codelens-memory__viewport");
         const tools = container.querySelector(".rs-codelens-memory__graph-tools");
         expect(tools.tagName).toBe("DETAILS");
@@ -104,14 +105,14 @@ describe("CodeLens trace viewer prototype", () => {
         const container = document.getElementById("viewer");
         const other = document.getElementById("other");
         mountTraceViewer(container, graph);
-        container.querySelector('input[value="text"]').click();
+        chooseView(container, "text");
         expect(window.localStorage.getItem("codelens-memory-view")).toBe("text");
         mountTraceViewer(other, loop);
-        expect(other.querySelector('input[value="text"]').checked).toBe(true);
+        expect(viewSelect(other).value).toBe("text");
         expect(other.querySelector(".rs-codelens-memory__stage").dataset.view).toBe("text");
         window.localStorage.setItem("codelens-memory-view", "bogus");
         mountTraceViewer(other, loop);
-        expect(other.querySelector('input[value="diagram"]').checked).toBe(true);
+        expect(viewSelect(other).value).toBe("diagram");
     });
 
     it("updates accessible variable rows and program output", () => {
@@ -172,25 +173,26 @@ describe("CodeLens trace viewer prototype", () => {
         expect(document.querySelectorAll("#jmpStepFwd")).toHaveLength(0);
     });
 
-    it("switches layouts without replacing memory or losing radio focus and keeps the view when stepping", () => {
+    it("switches layouts without replacing memory or losing select focus and keeps the view when stepping", () => {
         const container = document.getElementById("viewer");
         const viewer = mountTraceViewer(container, graph);
         const stage = container.querySelector(".rs-codelens-memory__stage");
         const heapHeading = [...stage.querySelectorAll("h5")].find((node) => node.textContent === "Dictionary 3");
-        const text = container.querySelector('input[value="text"]');
+        const select = viewSelect(container);
         expect(stage.dataset.view).toBe("diagram");
-        text.focus();
-        text.click();
+        expect(container.querySelector(`label[for="${select.id}"]`).textContent).toBe("Memory view");
+        select.focus();
+        chooseView(container, "text");
         expect(stage.dataset.view).toBe("text");
-        expect(document.activeElement).toBe(text);
+        expect(document.activeElement).toBe(select);
         expect(document.getElementById(heapHeading.id)).toBe(heapHeading);
         expect(stage.querySelector("svg").getAttribute("aria-hidden")).toBe("true");
         expect(stage.querySelector("svg").getAttribute("focusable")).toBe("false");
         expect(stage.getAttribute("aria-hidden")).toBeNull();
         viewer.stepForward();
         expect(stage.dataset.view).toBe("text");
-        expect(text.checked).toBe(true);
-        expect(document.activeElement).toBe(text);
+        expect(select.value).toBe("text");
+        expect(document.activeElement).toBe(select);
     });
 
     it("links aliases and a cycle to a single object and moves focus to its heading", () => {
@@ -230,14 +232,14 @@ describe("CodeLens trace viewer prototype", () => {
         const previous = container.querySelector('button[data-codelens-action="back"]');
         expect(previous.textContent).toBe("Previous line");
         expect(previous.getAttribute("aria-disabled")).toBe("false");
-        container.querySelector('input[value="text"]').click();
+        chooseView(container, "text");
         viewer.stepForward();
         previous.focus();
         previous.click();
 
         expect(viewer.currentStep).toBe(6);
         expect(document.activeElement).toBe(previous);
-        expect(container.querySelector('input[value="text"]').checked).toBe(true);
+        expect(viewSelect(container).value).toBe("text");
         const list = [...container.querySelectorAll("h5")].find((node) => node.textContent === "List 2");
         expect(list.closest(".rs-codelens-memory__card").querySelectorAll("tbody tr")).toHaveLength(2);
         expect(container.querySelector('[role="status"]').textContent).toContain(
@@ -284,8 +286,8 @@ describe("CodeLens trace viewer prototype", () => {
         mountTraceViewer(other, aliases, { startingInstruction: 4 });
         const ids = [...document.querySelectorAll("[id]")].map((node) => node.id);
         expect(new Set(ids).size).toBe(ids.length);
-        container.querySelector('input[value="text"]').click();
-        expect(other.querySelector('input[value="diagram"]').checked).toBe(true);
+        chooseView(container, "text");
+        expect(viewSelect(other).value).toBe("diagram");
         for (const link of document.querySelectorAll("a")) {
             expect(link.closest(".rs-codelens-memory").contains(document.getElementById(link.hash.slice(1)))).toBe(true);
         }
@@ -353,7 +355,7 @@ describe("CodeLens trace viewer prototype", () => {
         expect([...layout.options].map((option) => option.textContent)).toEqual([
             "Automatic", "Side by side", "Above/below",
         ]);
-        container.querySelector('input[value="text"]').click();
+        chooseView(container, "text");
         viewer.stepForward();
         layout.focus();
         for (const mode of ["side-by-side", "stacked", "auto"]) {
@@ -363,7 +365,7 @@ describe("CodeLens trace viewer prototype", () => {
             expect(viewer.currentStep).toBe(7);
             expect(container.querySelector(".rs-codelens-prototype__code")).toBe(source);
             expect(container.querySelector(".rs-codelens-memory")).toBe(memory);
-            expect(container.querySelector('input[value="text"]').checked).toBe(true);
+            expect(viewSelect(container).value).toBe("text");
         }
         layout.value = "stacked";
         layout.dispatchEvent(new Event("change"));
