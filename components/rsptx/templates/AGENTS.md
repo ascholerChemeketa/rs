@@ -25,8 +25,11 @@ JSON in `<script>` tags, and rebuilding caddy after changing `staticAssets`.
 
 `get_jinja_templates` puts the book's directory **before** this folder. PreTeXt books
 ship their own `_base.html`, so on the pages rendered this way (`doAssignment.html`,
-`chooseAssignment.html`, `book/course/current_course.html`) `{% extends "_base.html" %}`
-gets the **book's** base, not ours. That base:
+`chooseAssignment.html`, `studentreport.html`, `book/course/current_course.html`)
+`{% extends "_base.html" %}` gets the **book's** base, not ours. A student-facing route
+gets its environment from `get_student_page_templates()` in `student_pages.py`, and
+must then also pass `ebook_config_override` and the variables the book's base reads
+(`base_url`, `is_instructor` as the string `"true"`/`"false"`, ...). That base:
 
 - defines only the `title`, `css`, `content` and `js` blocks: no `navbar` block;
 - does not load `rs-core.css` or `nav.js`;

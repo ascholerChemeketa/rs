@@ -18,12 +18,11 @@ from fastapi import APIRouter, Request, Depends, status
 # -------------------------
 
 from rsptx.auth.session import auth_manager
-from rsptx.templates import get_jinja_templates, get_shared_templates
 from rsptx.templates.ebook_config import ebook_config_override
+from rsptx.templates.student_pages import get_student_page_templates
 from rsptx.db.crud import (
     fetch_assignments,
     fetch_all_assignment_stats,
-    course_attr_is_true,
     fetch_course,
     fetch_all_course_attributes,
     fetch_courses_for_user,
@@ -36,7 +35,7 @@ from rsptx.db.crud import (
 )
 from rsptx.configuration import settings
 from rsptx.logging import rslogger
-from rsptx.response_helpers import construct_course_url, safe_join
+from rsptx.response_helpers import construct_course_url
 from rsptx.response_helpers.core import canonical_utcnow, make_json_response
 from rsptx.auth.session import is_instructor
 from rsptx.db.crud.assignment import is_assignment_visible_to_students
@@ -135,22 +134,7 @@ async def index(request: Request, user=Depends(auth_manager)):
     for a in assignments:
         visibility_map[a.id] = is_assignment_visible_to_students(a)
 
-    use_pretext_student_pages = course_attr_is_true(
-        attrs, "use_pretext_student_pages", default=True
-    )
-    if use_pretext_student_pages:
-        book_path = safe_join(
-            settings.book_path,
-            course.base_course,
-            "published",
-            course.base_course,
-        )
-        if book_path:
-            templates = get_jinja_templates(book_path)
-        else:
-            templates = get_shared_templates()
-    else:
-        templates = get_shared_templates()
+    templates, use_pretext_student_pages = get_student_page_templates(course, attrs)
 
     context = {
         "assignment_list": assignments,

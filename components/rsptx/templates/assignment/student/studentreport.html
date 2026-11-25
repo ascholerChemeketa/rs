@@ -1,4 +1,9 @@
 {% extends "_base.html" %}
+{#- Usually rendered inside the book's own PreTeXt _base.html (see
+    rsptx.templates.student_pages), which has no navbar block and loads
+    neither rs-core.css nor Bootstrap's CSS.  So this page links its own
+    stylesheet, uses its own grid, and picks its button class by base.
+    ``user`` is the logged-in user; ``student`` is whose report this is. -#}
 {% block title %}
 Progress Report
 {% endblock %}
@@ -6,14 +11,15 @@ Progress Report
 <link href="/staticAssets/css/studentreport.css" rel="stylesheet" media="screen" />
 {% endblock %}
 {% block content %}
-<div id="studentreport" class="container">
-  <h1>
+{% set button_class = "ptx-button" if using_ptx_base == "true" else "btn btn-secondary btn-sm" %}
+<section id="studentreport" class="container">
+  <h1 class="heading">
     {{ course.course_name }}
     <span class="dash-title-description">Progress Report</span>
   </h1>
-  <h2>Student Report - {{ user.first_name }} {{ user.last_name }}</h2>
-  <div class="row">
-    <div class="col-md-7">
+  <h2 class="heading">Student Report - {{ student.first_name }} {{ student.last_name }}</h2>
+  <div class="studentreport-columns">
+    <div>
       <div class="dash-section" id="book-completion">
         <div class="dash-section-header">Book Completion</div>
         <div class="dash-section-content">
@@ -62,12 +68,12 @@ Progress Report
         </div>
       </div>
     </div>
-    <div class="col-md-5">
+    <div>
       <div class="dash-section">
         <div class="dash-section-header">Profile</div>
         <div class="dash-section-content">
-          <div>Username: {{ user.username }}</div>
-          <div>Email: {{ user.email }}</div>
+          <div>Username: {{ student.username }}</div>
+          <div>Email: {{ student.email }}</div>
         </div>
       </div>
       <div class="dash-section">
@@ -89,14 +95,14 @@ Progress Report
           </table>
         </div>
         <div class="dash-section-content">
-          <form action="/assignment/student/studentreport" method="get">
+          <form class="studentreport-downloads" action="/assignment/student/studentreport" method="get">
             {% if target_id %}
             <input type="hidden" name="id" value="{{ target_id }}" />
             {% endif %}
-            <button class="btn btn-secondary btn-sm" type="submit" name="action" value="dlcsv">
+            <button class="{{ button_class }}" type="submit" name="action" value="dlcsv">
               Download History
             </button>
-            <button class="btn btn-secondary btn-sm" type="submit" name="action" value="dlcode">
+            <button class="{{ button_class }}" type="submit" name="action" value="dlcode">
               Download All Code
             </button>
           </form>
@@ -104,12 +110,12 @@ Progress Report
       </div>
     </div>
   </div>
-</div>
+</section>
 {% endblock %}
 
 {% block js %}
 <script>
-  document.querySelectorAll(".chapter .clickable").forEach(function (el) {
+  document.querySelectorAll("#studentreport .chapter .clickable").forEach(function (el) {
     el.addEventListener("click", function () {
       el.classList.toggle("expanded");
       el.parentElement.querySelectorAll(":scope > .chapter-detail").forEach(function (detail) {

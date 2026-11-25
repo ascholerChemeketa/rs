@@ -37,7 +37,6 @@ from pydantic import BaseModel
 from rsptx.logging import rslogger
 from rsptx.db.crud import (
     create_useinfo_entry,
-    course_attr_is_true,
     fetch_assignments,
     fetch_all_assignment_stats,
     fetch_all_grades_for_assignment,
@@ -72,14 +71,12 @@ from rsptx.db.crud.assignment import is_assignment_visible_to_students
 from rsptx.auth.session import auth_manager, is_instructor
 from rsptx.templates import (
     format_course_datetime,
-    get_jinja_templates,
-    get_shared_templates,
 )
 from rsptx.templates.ebook_config import ebook_config_override
+from rsptx.templates.student_pages import get_student_page_templates
 from rsptx.response_helpers import (
     construct_course_url,
     prepare_question_htmlsrc,
-    safe_join,
 )
 from rsptx.response_helpers.core import (
     make_json_response,
@@ -175,26 +172,9 @@ async def get_assignments(
     for a in assignments:
         visibility_map[a.id] = is_assignment_visible_to_students(a)
 
-    use_pretext_student_pages = course_attr_is_true(
-        course_attrs, "use_pretext_student_pages", default=True
+    templates, use_pretext_student_pages = get_student_page_templates(
+        course, course_attrs
     )
-    if use_pretext_student_pages:
-        book_path = safe_join(
-            settings.book_path,
-            course.base_course,
-            "published",
-            course.base_course,
-        )
-        if book_path:
-            templates = get_jinja_templates(book_path)
-        else:
-            rslogger.warning(
-                "Unsafe or invalid book_path computed for course %s; falling back to shared templates",
-                course.course_name,
-            )
-            templates = get_shared_templates()
-    else:
-        templates = get_shared_templates()
 
     context = dict(
         course=course,
@@ -437,18 +417,51 @@ async def studentreport(
     # Recent activity ---------------------------------------------------------
     activity = await fetch_recent_useinfo(sid, course.course_name)
 
-    templates = get_shared_templates()
+    course_attrs = await fetch_all_course_attributes(course.id)
+    templates, use_pretext_student_pages = get_student_page_templates(
+        course, course_attrs
+    )
     context = dict(
         request=request,
         course=course,
-        user=target_user,
-        is_instructor=user_is_instructor,
+        # ``user`` is the logged-in user (the navbar and footer show it);
+        # ``student`` is whose report this is, which differs when an
+        # instructor passes ``?id=``.
+        user=user,
+        student=target_user,
+        # A string, not a bool: the book's _base.html writes it straight into
+        # JavaScript (``eBookConfig.isInstructor = {{ is_instructor }}``).
+        is_instructor="true" if user_is_instructor else "false",
         student_page=True,
         chapters=chapter_progress,
         assignments=grades,
         activity=activity,
         target_id=id if (id and user_is_instructor) else None,
+        # Variables the book's _base.html expects.  Books built before
+        # ``ebook_config_override`` existed read eBookConfig from these alone.
+        course_name=course.course_name,
+        base_course=course.base_course,
+        term_start_date=course.term_start_date,
+        base_url=construct_course_url(course),
+        is_logged_in="true",
+        user_id=user.username,
+        user_email=user.email,
+        readings="null",  # force bookfuncs to not render assignment tracker
+        activity_info="{}",
+        downloads_enabled="true" if course.downloads_enabled else "false",
+        allow_pairs="true" if course.allow_pairs else "false",
+        course_attrs=course_attrs,
+        settings=settings,
     )
+    if use_pretext_student_pages:
+        context["ebook_config_override"] = await ebook_config_override(
+            course=course,
+            user=user,
+            user_is_instructor=user_is_instructor,
+            course_attrs=course_attrs,
+            readings=None,  # force bookfuncs to not render assignment tracker
+            activities={},
+        )
     return templates.TemplateResponse(
         request, "assignment/student/studentreport.html", context
     )
@@ -993,28 +1006,10 @@ async def doAssignment(
     if timestamp > deadline:
         overdue = True
 
-    use_pretext_student_pages = course_attr_is_true(
-        course_attrs, "use_pretext_student_pages", default=True
+    templates, use_pretext_student_pages = get_student_page_templates(
+        course, course_attrs
     )
-    if use_pretext_student_pages:
-        book_path = safe_join(
-            settings.book_path,
-            course.base_course,
-            "published",
-            course.base_course,
-        )
-        if book_path:
-            templates = get_jinja_templates(book_path)
-        else:
-            rslogger.warning(
-                "Unsafe or invalid book_path computed for course %s; falling back to shared templates",
-                course.course_name,
-            )
-            templates = get_shared_templates()
-    else:
-        templates = get_shared_templates()
 
-    # templates = get_shared_templates()
     # reverse the order of the keys in the preambles dictionary so that the first key I added is now the last
     # this will ensure that when multiple preamble definitions are used the last one is from the current course
     preambles = dict((k, v) for k, v in reversed(preambles.items()))

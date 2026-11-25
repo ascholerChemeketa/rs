@@ -108,6 +108,69 @@ async def test_instructor_can_view_student(auth_instructor_client):
     resp = await auth_instructor_client.get("/student/studentreport?id=testuser1")
     assert resp.status_code == 200
     assert "Student Report" in resp.text
+    assert "Username: testuser1" in resp.text
+    # The navbar and footer still name the instructor who is logged in, not
+    # the student whose report this is.
+    assert "logged in: test_instructor" in resp.text
+    assert "logged in: testuser1" not in resp.text
+
+
+# A stand-in for the _base.html a PreTeXt book ships: the same blocks, the
+# ``using_ptx_base`` flag, and eBookConfig written straight into JavaScript.
+_FAKE_PTX_BASE = """<!DOCTYPE html>
+<html><head>
+{% set using_ptx_base = "true" %}
+<base href="{{ base_url }}">
+<title>{% block title %}{% endblock %}</title>
+<script>
+eBookConfig = {};
+eBookConfig.course = '{{ course_name }}';
+eBookConfig.isLoggedIn = {{ is_logged_in|default('false') }};
+eBookConfig.isInstructor = {{ is_instructor|default('false') }};
+{{ ebook_config_override | safe }}
+</script>
+{% block css %}{% endblock %}
+</head><body>
+<!-- FAKE PTX BASE -->
+<main class="ptx-main"><div id="ptx-content" class="ptx-content">
+{% block content %}{% endblock %}
+</div></main>
+{% block js %}{% endblock %}
+</body></html>
+"""
+
+
+@asyncio_session
+async def test_student_report_uses_book_template(
+    auth_assignment_client, tmp_path, monkeypatch
+):
+    """When the course's book ships a _base.html, the progress report renders
+    inside it, with the eBookConfig values that base needs."""
+    from rsptx.configuration import settings
+    from rsptx.db.crud import fetch_course, fetch_user
+
+    user = await fetch_user("testuser1")
+    course = await fetch_course(user.course_name)
+    book_dir = tmp_path / course.base_course / "published" / course.base_course
+    book_dir.mkdir(parents=True)
+    (book_dir / "_base.html").write_text(_FAKE_PTX_BASE)
+    monkeypatch.setattr(settings, "book_path", str(tmp_path))
+
+    resp = await auth_assignment_client.get("/student/studentreport")
+
+    assert resp.status_code == 200
+    text = resp.text
+    assert "FAKE PTX BASE" in text
+    assert "Student Report" in text
+    # No shared navbar: the book's base has none.
+    assert "logged in:" not in text
+    # Valid JavaScript, not Python's True/False.
+    assert "eBookConfig.isLoggedIn = true;" in text
+    assert "eBookConfig.isInstructor = false;" in text
+    assert "ebook_config_override = {" in text
+    # The book's theme styles .ptx-button; Bootstrap's CSS is not loaded.
+    assert 'class="ptx-button"' in text
+    assert "btn-secondary" not in text
 
 
 # ---------------------------------------------------------------------------

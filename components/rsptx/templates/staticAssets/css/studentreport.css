@@ -1,9 +1,31 @@
 /* Styles for the student progress report (assignment/student/studentreport.html).
-   Ported from the legacy web2py dashboard.css, restyled to fit the assignment
-   server look-and-feel (Bootstrap based). */
+   Ported from the legacy web2py dashboard.css.
+
+   The page usually renders inside the book's own PreTeXt _base.html, which
+   loads neither rs-core.css nor Bootstrap's CSS, and may be in dark mode.  So
+   colors try the PreTeXt theme variable first, then the rs-core token, then a
+   literal; and the layout uses its own grid instead of Bootstrap's row/col. */
+
+#studentreport {
+    --sr-text: var(--body-text-color, var(--rs-color-text-strong, #333));
+    --sr-border: var(--page-border-color, var(--rs-color-border, #ddd));
+    --sr-surface: var(--content-background, var(--rs-color-white, #fff));
+    --sr-header-background: rgb(128 128 128 / 0.12);
+    --sr-hover-background: rgb(128 128 128 / 0.12);
+    --sr-muted-text: var(--rs-color-text-light, #767676);
+    /* Both pass WCAG AA (4.5:1) against white. */
+    --sr-completed: #007a00;
+    --sr-started: #6e7a00;
+}
+
+:root.dark-mode #studentreport {
+    --sr-muted-text: #b3b3b3;
+    --sr-completed: #5fd35f;
+    --sr-started: #c8d34a;
+}
 
 #studentreport h1 {
-    border-bottom: 1px solid var(--rs-color-text-strong);
+    border-bottom: 1px solid var(--sr-text);
     margin: 0 0 0.5em 0;
     padding: 0.2em 0;
 }
@@ -13,114 +35,126 @@
     font-size: 1.3rem;
 }
 
-.dash-title-description {
+#studentreport .dash-title-description {
     font-size: 0.6em;
-    color: var(--rs-color-text-light);
+    color: var(--sr-muted-text);
 }
 
-.dash-section {
+#studentreport .studentreport-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 0 1.5em;
+}
+
+@media (max-width: 768px) {
+    #studentreport .studentreport-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+#studentreport .dash-section {
     margin: 0 0 1.5em 0;
-    border: 1px solid var(--rs-color-border);
+    border: 1px solid var(--sr-border);
     border-radius: 4px;
-    background-color: var(--rs-color-white);
+    background-color: var(--sr-surface);
 }
 
-.dash-section-header {
+#studentreport .dash-section-header {
     font-size: 1rem;
     font-weight: bold;
     padding: 0.4em 0.6em;
-    border-bottom: 1px solid var(--rs-color-text-strong);
-    background-color: var(--rs-color-surface-muted);
+    border-bottom: 1px solid var(--sr-text);
+    background-color: var(--sr-header-background);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
 
-.dash-section-content {
+#studentreport .dash-section-content {
     padding: 0.6em;
 }
 
-.dash-section-content.scroll {
+#studentreport .dash-section-content.scroll {
     overflow-y: auto;
     max-height: 500px;
 }
 
-.dash-section-content table {
+#studentreport .dash-section-content table {
     width: 100%;
     border-collapse: collapse;
+    margin: 0;
 }
 
-.dash-section-content thead {
-    background-color: #e6e6e6;
-    font-weight: bold;
-}
-
-.dash-section-content thead td {
-    border: 1px solid var(--rs-color-border-strong);
+#studentreport .dash-section-content th,
+#studentreport .dash-section-content td {
     padding: 0.2em 0.5em;
-}
-
-.dash-section-content tbody tr {
-    border-bottom: 1px solid var(--rs-color-surface-muted);
-}
-
-.dash-section-content td {
-    padding: 0.2em 0.5em;
-}
-
-.dash-section-content .nodec tbody {
-    background-color: transparent;
-}
-
-.dash-section-content .nodec tr {
+    text-align: left;
     border: none;
+}
+
+#studentreport .dash-section-content thead {
+    background-color: var(--sr-header-background);
+}
+
+#studentreport .dash-section-content tbody tr {
+    border-bottom: 1px solid var(--sr-border);
+}
+
+#studentreport .dash-section-content .nodec tr {
+    border: none;
+}
+
+#studentreport .studentreport-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
 }
 
 /* Book completion status colors */
 #book-completion .completed {
-    color: #009900;
+    color: var(--sr-completed);
 }
 
 #book-completion .started {
-    color: #6e7a00;
+    color: var(--sr-started);
 }
 
 #book-completion .notstarted {
-    color: var(--rs-color-text-strong);
+    color: var(--sr-text);
 }
 
-.chapter .clickable {
+#studentreport .chapter .clickable {
     cursor: pointer;
     font-weight: bold;
     padding: 0.2em 0;
 }
 
-.chapter .clickable:hover {
-    background-color: #f3f3f3;
+#studentreport .chapter .clickable:hover {
+    background-color: var(--sr-hover-background);
 }
 
-.chapter .collapse-icon {
+#studentreport .chapter .collapse-icon {
     float: right;
 }
 
-.chapter .collapse-icon::after {
+#studentreport .chapter .collapse-icon::after {
     content: "\25B8"; /* right-pointing triangle */
 }
 
-.chapter .clickable.expanded .collapse-icon::after {
+#studentreport .chapter .clickable.expanded .collapse-icon::after {
     content: "\25BE"; /* down-pointing triangle */
 }
 
-.chapter-detail {
-    border-left: 1px solid #e5e5e5;
+#studentreport .chapter-detail {
+    border-left: 1px solid var(--sr-border);
     margin-left: 0.5em;
     margin-bottom: 1em;
     font-weight: normal;
 }
 
-.chapter-detail div {
+#studentreport .chapter-detail div {
     margin-left: 0.5em;
 }
 
-.dhide {
+#studentreport .dhide {
     display: none;
 }
